@@ -1,0 +1,1472 @@
+-- ============================================================
+-- Dane pokazowe
+-- Uruchamiac PO 02_insert_test_data.sql
+-- ============================================================
+
+-- ============================================================
+-- Dodatkowi uzytkownicy (ID 7-20)
+-- ============================================================
+INSERT INTO
+    USERS (FIRST_NAME, LAST_NAME, EMAIL)
+VALUES (
+        'Jakub',
+        'Wojcik',
+        'jakub.wojcik@mail.com'
+    );
+
+INSERT INTO
+    USERS (FIRST_NAME, LAST_NAME, EMAIL)
+VALUES (
+        'Zofia',
+        'Kaminska',
+        'zofia.kaminska@mail.com'
+    );
+
+INSERT INTO
+    USERS (FIRST_NAME, LAST_NAME, EMAIL)
+VALUES (
+        'Michal',
+        'Lewicki',
+        'michal.lewicki@mail.com'
+    );
+
+INSERT INTO
+    USERS (FIRST_NAME, LAST_NAME, EMAIL)
+VALUES (
+        'Katarzyna',
+        'Dabrowska',
+        'kasia.d@mail.com'
+    );
+
+INSERT INTO
+    USERS (FIRST_NAME, LAST_NAME, EMAIL)
+VALUES (
+        'Marek',
+        'Grabowski',
+        'marek.g@mail.com'
+    );
+
+INSERT INTO
+    USERS (FIRST_NAME, LAST_NAME, EMAIL)
+VALUES (
+        'Ewa',
+        'Szymanska',
+        'ewa.sz@mail.com'
+    );
+
+INSERT INTO
+    USERS (FIRST_NAME, LAST_NAME, EMAIL)
+VALUES (
+        'Bartosz',
+        'Krawczyk',
+        'bartosz.k@mail.com'
+    );
+
+INSERT INTO
+    USERS (FIRST_NAME, LAST_NAME, EMAIL)
+VALUES (
+        'Natalia',
+        'Pawlak',
+        'natalia.p@mail.com'
+    );
+
+INSERT INTO
+    USERS (FIRST_NAME, LAST_NAME, EMAIL)
+VALUES (
+        'Dawid',
+        'Michalski',
+        'dawid.m@mail.com'
+    );
+
+INSERT INTO
+    USERS (FIRST_NAME, LAST_NAME, EMAIL)
+VALUES (
+        'Paulina',
+        'Wrobel',
+        'paulina.w@mail.com'
+    );
+
+INSERT INTO
+    USERS (FIRST_NAME, LAST_NAME, EMAIL)
+VALUES (
+        'Lukasz',
+        'Adamczyk',
+        'lukasz.a@mail.com'
+    );
+
+INSERT INTO
+    USERS (FIRST_NAME, LAST_NAME, EMAIL)
+VALUES (
+        'Monika',
+        'Jasinska',
+        'monika.j@mail.com'
+    );
+
+INSERT INTO
+    USERS (FIRST_NAME, LAST_NAME, EMAIL)
+VALUES (
+        'Grzegorz',
+        'Zawadzki',
+        'grzegorz.z@mail.com'
+    );
+
+INSERT INTO
+    USERS (FIRST_NAME, LAST_NAME, EMAIL)
+VALUES (
+        'Agnieszka',
+        'Kowalczyk',
+        'agnieszka.kow@mail.com'
+    );
+
+INSERT INTO
+    USERS (
+        FIRST_NAME,
+        LAST_NAME,
+        EMAIL,
+        STATUS
+    )
+VALUES (
+        'Radoslaw',
+        'Wolny',
+        'radek.wolny@mail.com',
+        'WATCHED'
+    );
+
+INSERT INTO
+    USERS (
+        FIRST_NAME,
+        LAST_NAME,
+        EMAIL,
+        STATUS
+    )
+VALUES (
+        'Krzysztof',
+        'Baran',
+        'krzys.baran@mail.com',
+        'SUSPENDED'
+    );
+
+COMMIT;
+
+-- ============================================================
+-- Posty – bezpieczne (autor_id 2-14, kategorie 1-5)
+-- ============================================================
+INSERT INTO
+    POSTS (
+        AUTHOR_ID,
+        CATEGORY_ID,
+        CONTENT_SUMMARY,
+        CREATED_AT
+    )
+VALUES (
+        2,
+        1,
+        'Moj pies nauczyl sie otwierac drzwi – nagranie z kamery',
+        TIMESTAMP '2025-01-05 08:12:00'
+    );
+
+INSERT INTO
+    POSTS (
+        AUTHOR_ID,
+        CATEGORY_ID,
+        CONTENT_SUMMARY,
+        CREATED_AT
+    )
+VALUES (
+        3,
+        2,
+        'Zupa pomidorowa babci – sekret tkwi w majeranku',
+        TIMESTAMP '2025-01-06 09:30:00'
+    );
+
+INSERT INTO
+    POSTS (
+        AUTHOR_ID,
+        CATEGORY_ID,
+        CONTENT_SUMMARY,
+        CREATED_AT
+    )
+VALUES (
+        4,
+        3,
+        'Recenzja: nowy album Taco Hemingway to arcydzielo',
+        TIMESTAMP '2025-01-07 10:00:00'
+    );
+
+INSERT INTO
+    POSTS (
+        AUTHOR_ID,
+        CATEGORY_ID,
+        CONTENT_SUMMARY,
+        CREATED_AT
+    )
+VALUES (
+        5,
+        4,
+        'Bieganie w gorach – porady dla poczatkujacych',
+        TIMESTAMP '2025-01-08 07:45:00'
+    );
+
+INSERT INTO
+    POSTS (
+        AUTHOR_ID,
+        CATEGORY_ID,
+        CONTENT_SUMMARY,
+        CREATED_AT
+    )
+VALUES (
+        6,
+        5,
+        'Recenzja iPhone 17 Pro – czy warto?',
+        TIMESTAMP '2025-01-09 12:00:00'
+    );
+
+INSERT INTO
+    POSTS (
+        AUTHOR_ID,
+        CATEGORY_ID,
+        CONTENT_SUMMARY,
+        CREATED_AT
+    )
+VALUES (
+        7,
+        1,
+        'Kot ktory boi sie wlasnego ogona – 60 sekund smiechu',
+        TIMESTAMP '2025-01-10 14:20:00'
+    );
+
+INSERT INTO
+    POSTS (
+        AUTHOR_ID,
+        CATEGORY_ID,
+        CONTENT_SUMMARY,
+        CREATED_AT
+    )
+VALUES (
+        8,
+        2,
+        'Jak zrobic idealne sushi w domu bez specjalnych narzedzi',
+        TIMESTAMP '2025-01-11 16:00:00'
+    );
+
+INSERT INTO
+    POSTS (
+        AUTHOR_ID,
+        CATEGORY_ID,
+        CONTENT_SUMMARY,
+        CREATED_AT
+    )
+VALUES (
+        9,
+        3,
+        'Playlist na wiosne 2025 – 50 utworow ktore podnosza na duchu',
+        TIMESTAMP '2025-01-12 08:00:00'
+    );
+
+INSERT INTO
+    POSTS (
+        AUTHOR_ID,
+        CATEGORY_ID,
+        CONTENT_SUMMARY,
+        CREATED_AT
+    )
+VALUES (
+        10,
+        4,
+        'Wyprawa na Sniezke – relacja krok po kroku',
+        TIMESTAMP '2025-01-13 11:00:00'
+    );
+
+INSERT INTO
+    POSTS (
+        AUTHOR_ID,
+        CATEGORY_ID,
+        CONTENT_SUMMARY,
+        CREATED_AT
+    )
+VALUES (
+        11,
+        5,
+        'VS Code vs Cursor – kto wygrywa w 2025?',
+        TIMESTAMP '2025-01-14 09:15:00'
+    );
+
+INSERT INTO
+    POSTS (
+        AUTHOR_ID,
+        CATEGORY_ID,
+        CONTENT_SUMMARY,
+        CREATED_AT
+    )
+VALUES (
+        12,
+        1,
+        'Adoptowalem trzy koty naraz – jak przezyc pierwsze tygodnie',
+        TIMESTAMP '2025-01-15 10:30:00'
+    );
+
+INSERT INTO
+    POSTS (
+        AUTHOR_ID,
+        CATEGORY_ID,
+        CONTENT_SUMMARY,
+        CREATED_AT
+    )
+VALUES (
+        13,
+        2,
+        'Pizza na grubym ciescie w domowym piekarniku – dziala!',
+        TIMESTAMP '2025-01-16 17:00:00'
+    );
+
+INSERT INTO
+    POSTS (
+        AUTHOR_ID,
+        CATEGORY_ID,
+        CONTENT_SUMMARY,
+        CREATED_AT
+    )
+VALUES (
+        14,
+        3,
+        'Jazz w Polsce przezywa renesans – moje ulubione nowe zespoly',
+        TIMESTAMP '2025-01-17 13:00:00'
+    );
+
+INSERT INTO
+    POSTS (
+        AUTHOR_ID,
+        CATEGORY_ID,
+        CONTENT_SUMMARY,
+        CREATED_AT
+    )
+VALUES (
+        2,
+        4,
+        'Rower elektryczny przez miesiac – uczciwa recenzja',
+        TIMESTAMP '2025-01-18 08:00:00'
+    );
+
+INSERT INTO
+    POSTS (
+        AUTHOR_ID,
+        CATEGORY_ID,
+        CONTENT_SUMMARY,
+        CREATED_AT
+    )
+VALUES (
+        3,
+        5,
+        'Python czy Rust – co wybrac w 2025 na backend?',
+        TIMESTAMP '2025-01-19 10:00:00'
+    );
+
+-- ============================================================
+-- Posty – polityczne (kategorie 6-8)
+-- ============================================================
+INSERT INTO
+    POSTS (
+        AUTHOR_ID,
+        CATEGORY_ID,
+        CONTENT_SUMMARY,
+        CREATED_AT
+    )
+VALUES (
+        2,
+        6,
+        'Dlaczego 4-dniowy tydzien pracy to koniecznosc ekonomiczna',
+        TIMESTAMP '2025-02-01 09:00:00'
+    );
+
+INSERT INTO
+    POSTS (
+        AUTHOR_ID,
+        CATEGORY_ID,
+        CONTENT_SUMMARY,
+        CREATED_AT
+    )
+VALUES (
+        7,
+        6,
+        'Sluzba zdrowia powinna byc w pelni publiczna – argumenty',
+        TIMESTAMP '2025-02-02 10:30:00'
+    );
+
+INSERT INTO
+    POSTS (
+        AUTHOR_ID,
+        CATEGORY_ID,
+        CONTENT_SUMMARY,
+        CREATED_AT
+    )
+VALUES (
+        3,
+        7,
+        'Rodzina i tradycja – fundament spoleczenstwa ktory trzeba chronic',
+        TIMESTAMP '2025-02-03 11:00:00'
+    );
+
+INSERT INTO
+    POSTS (
+        AUTHOR_ID,
+        CATEGORY_ID,
+        CONTENT_SUMMARY,
+        CREATED_AT
+    )
+VALUES (
+        11,
+        7,
+        'Niskie podatki = lepsza gospodarka – dowody z ostatnich 30 lat',
+        TIMESTAMP '2025-02-04 08:00:00'
+    );
+
+INSERT INTO
+    POSTS (
+        AUTHOR_ID,
+        CATEGORY_ID,
+        CONTENT_SUMMARY,
+        CREATED_AT
+    )
+VALUES (
+        4,
+        8,
+        'Debata o imigracji – argumenty obu stron bez emocji',
+        TIMESTAMP '2025-02-05 12:00:00'
+    );
+
+INSERT INTO
+    POSTS (
+        AUTHOR_ID,
+        CATEGORY_ID,
+        CONTENT_SUMMARY,
+        CREATED_AT
+    )
+VALUES (
+        13,
+        8,
+        'Analiza: jak centrysta patrzy na polityke energetyczna UE',
+        TIMESTAMP '2025-02-06 14:00:00'
+    );
+
+INSERT INTO
+    POSTS (
+        AUTHOR_ID,
+        CATEGORY_ID,
+        CONTENT_SUMMARY,
+        CREATED_AT
+    )
+VALUES (
+        6,
+        6,
+        'Zielony lad to nie koszt – to inwestycja w przyszlosc',
+        TIMESTAMP '2025-02-07 09:30:00'
+    );
+
+INSERT INTO
+    POSTS (
+        AUTHOR_ID,
+        CATEGORY_ID,
+        CONTENT_SUMMARY,
+        CREATED_AT
+    )
+VALUES (
+        14,
+        7,
+        'Bezpieczenstwo granic to priorytet – EU musi to zrozumiec',
+        TIMESTAMP '2025-02-08 10:00:00'
+    );
+
+-- ============================================================
+-- Posty – szczegolnej uwagi (kategoria 1-9, z reason_id i severity)
+-- ============================================================
+INSERT INTO
+    POSTS (
+        AUTHOR_ID,
+        CATEGORY_ID,
+        REASON_ID,
+        SEVERITY_SCORE,
+        CONTENT_SUMMARY,
+        IS_FLAGGED,
+        CREATED_AT
+    )
+VALUES (
+        21,
+        9,
+        8,
+        5,
+        'Tresc zawierajaca mowe nienawisci na tle etnicznym – zablokowana',
+        1,
+        TIMESTAMP '2025-03-01 01:00:00'
+    );
+
+INSERT INTO
+    POSTS (
+        AUTHOR_ID,
+        CATEGORY_ID,
+        REASON_ID,
+        SEVERITY_SCORE,
+        CONTENT_SUMMARY,
+        IS_FLAGGED,
+        CREATED_AT
+    )
+VALUES (
+        22,
+        9,
+        6,
+        4,
+        'Post gloryfikujacy rzad autorytarny i krytykujacy demokracje',
+        1,
+        TIMESTAMP '2025-03-02 02:00:00'
+    );
+
+INSERT INTO
+    POSTS (
+        AUTHOR_ID,
+        CATEGORY_ID,
+        REASON_ID,
+        SEVERITY_SCORE,
+        CONTENT_SUMMARY,
+        IS_FLAGGED,
+        CREATED_AT
+    )
+VALUES (
+        21,
+        7,
+        4,
+        4,
+        'Komentarz mizoginiczny pod artykulem o prawach kobiet',
+        1,
+        TIMESTAMP '2025-03-03 03:00:00'
+    );
+
+INSERT INTO
+    POSTS (
+        AUTHOR_ID,
+        CATEGORY_ID,
+        REASON_ID,
+        SEVERITY_SCORE,
+        CONTENT_SUMMARY,
+        IS_FLAGGED,
+        CREATED_AT
+    )
+VALUES (
+        21,
+        1,
+        9,
+        5,
+        'Drastyczne tresci prezentujace przemoc wobec zwierzat',
+        1,
+        TIMESTAMP '2025-03-04 04:00:00'
+    );
+
+INSERT INTO
+    POSTS (
+        AUTHOR_ID,
+        CATEGORY_ID,
+        REASON_ID,
+        SEVERITY_SCORE,
+        CONTENT_SUMMARY,
+        IS_FLAGGED,
+        CREATED_AT
+    )
+VALUES (
+        22,
+        4,
+        3,
+        3,
+        'Poradnik: jak ominac systemy zabezpieczen w Minecrafcie (nielegalny)',
+        1,
+        TIMESTAMP '2025-03-05 05:00:00'
+    );
+
+INSERT INTO
+    POSTS (
+        AUTHOR_ID,
+        CATEGORY_ID,
+        REASON_ID,
+        SEVERITY_SCORE,
+        CONTENT_SUMMARY,
+        IS_FLAGGED,
+        CREATED_AT
+    )
+VALUES (
+        5,
+        2,
+        1,
+        1,
+        'Przepis na brownie z komentarzem pelnym przeklenst w stylu vlog',
+        0,
+        TIMESTAMP '2025-03-06 08:00:00'
+    );
+
+INSERT INTO
+    POSTS (
+        AUTHOR_ID,
+        CATEGORY_ID,
+        REASON_ID,
+        SEVERITY_SCORE,
+        CONTENT_SUMMARY,
+        IS_FLAGGED,
+        CREATED_AT
+    )
+VALUES (
+        9,
+        3,
+        2,
+        2,
+        'Recenzja muzyki zawierajaca tresci nieodpowiednie dla reklamodawcow',
+        0,
+        TIMESTAMP '2025-03-07 09:00:00'
+    );
+
+INSERT INTO
+    POSTS (
+        AUTHOR_ID,
+        CATEGORY_ID,
+        REASON_ID,
+        SEVERITY_SCORE,
+        CONTENT_SUMMARY,
+        IS_FLAGGED,
+        CREATED_AT
+    )
+VALUES (
+        22,
+        9,
+        10,
+        5,
+        'Tresc antysemicka z symbolika zakazana – natychmiastowa blokada',
+        1,
+        TIMESTAMP '2025-03-08 00:30:00'
+    );
+
+COMMIT;
+
+-- ============================================================
+-- Polubienia (duza ilosc – rozne profile)
+-- ============================================================
+INSERT INTO LIKES (USER_ID, POST_ID) VALUES (2, 1);
+
+INSERT INTO LIKES (USER_ID, POST_ID) VALUES (2, 7);
+
+INSERT INTO LIKES (USER_ID, POST_ID) VALUES (2, 12);
+
+INSERT INTO LIKES (USER_ID, POST_ID) VALUES (2, 16);
+
+INSERT INTO LIKES (USER_ID, POST_ID) VALUES (2, 17);
+
+INSERT INTO LIKES (USER_ID, POST_ID) VALUES (2, 23);
+
+INSERT INTO LIKES (USER_ID, POST_ID) VALUES (2, 20);
+
+INSERT INTO LIKES (USER_ID, POST_ID) VALUES (2, 5);
+
+INSERT INTO LIKES (USER_ID, POST_ID) VALUES (3, 2);
+
+INSERT INTO LIKES (USER_ID, POST_ID) VALUES (3, 8);
+
+INSERT INTO LIKES (USER_ID, POST_ID) VALUES (3, 13);
+
+INSERT INTO LIKES (USER_ID, POST_ID) VALUES (3, 18);
+
+INSERT INTO LIKES (USER_ID, POST_ID) VALUES (3, 19);
+
+INSERT INTO LIKES (USER_ID, POST_ID) VALUES (3, 24);
+
+INSERT INTO LIKES (USER_ID, POST_ID) VALUES (3, 20);
+
+INSERT INTO LIKES (USER_ID, POST_ID) VALUES (4, 3);
+
+INSERT INTO LIKES (USER_ID, POST_ID) VALUES (4, 4);
+
+INSERT INTO LIKES (USER_ID, POST_ID) VALUES (4, 9);
+
+INSERT INTO LIKES (USER_ID, POST_ID) VALUES (4, 10);
+
+INSERT INTO LIKES (USER_ID, POST_ID) VALUES (4, 14);
+
+INSERT INTO LIKES (USER_ID, POST_ID) VALUES (4, 20);
+
+INSERT INTO LIKES (USER_ID, POST_ID) VALUES (4, 21);
+
+INSERT INTO LIKES (USER_ID, POST_ID) VALUES (5, 6);
+
+INSERT INTO LIKES (USER_ID, POST_ID) VALUES (5, 11);
+
+INSERT INTO LIKES (USER_ID, POST_ID) VALUES (5, 15);
+
+INSERT INTO LIKES (USER_ID, POST_ID) VALUES (5, 16);
+
+INSERT INTO LIKES (USER_ID, POST_ID) VALUES (6, 6);
+
+INSERT INTO LIKES (USER_ID, POST_ID) VALUES (6, 16);
+
+INSERT INTO LIKES (USER_ID, POST_ID) VALUES (6, 23);
+
+INSERT INTO LIKES (USER_ID, POST_ID) VALUES (6, 17);
+
+INSERT INTO LIKES (USER_ID, POST_ID) VALUES (7, 1);
+
+INSERT INTO LIKES (USER_ID, POST_ID) VALUES (7, 7);
+
+INSERT INTO LIKES (USER_ID, POST_ID) VALUES (7, 17);
+
+INSERT INTO LIKES (USER_ID, POST_ID) VALUES (7, 16);
+
+INSERT INTO LIKES (USER_ID, POST_ID) VALUES (8, 2);
+
+INSERT INTO LIKES (USER_ID, POST_ID) VALUES (8, 3);
+
+INSERT INTO LIKES (USER_ID, POST_ID) VALUES (8, 8);
+
+INSERT INTO LIKES (USER_ID, POST_ID) VALUES (8, 13);
+
+INSERT INTO LIKES (USER_ID, POST_ID) VALUES (9, 3);
+
+INSERT INTO LIKES (USER_ID, POST_ID) VALUES (9, 9);
+
+INSERT INTO LIKES (USER_ID, POST_ID) VALUES (9, 14);
+
+INSERT INTO LIKES (USER_ID, POST_ID) VALUES (9, 11);
+
+INSERT INTO LIKES (USER_ID, POST_ID) VALUES (10, 4);
+
+INSERT INTO LIKES (USER_ID, POST_ID) VALUES (10, 10);
+
+INSERT INTO LIKES (USER_ID, POST_ID) VALUES (10, 15);
+
+INSERT INTO LIKES (USER_ID, POST_ID) VALUES (10, 20);
+
+INSERT INTO LIKES (USER_ID, POST_ID) VALUES (11, 11);
+
+INSERT INTO LIKES (USER_ID, POST_ID) VALUES (11, 15);
+
+INSERT INTO LIKES (USER_ID, POST_ID) VALUES (11, 18);
+
+INSERT INTO LIKES (USER_ID, POST_ID) VALUES (11, 19);
+
+INSERT INTO LIKES (USER_ID, POST_ID) VALUES (11, 24);
+
+INSERT INTO LIKES (USER_ID, POST_ID) VALUES (12, 1);
+
+INSERT INTO LIKES (USER_ID, POST_ID) VALUES (12, 7);
+
+INSERT INTO LIKES (USER_ID, POST_ID) VALUES (12, 12);
+
+INSERT INTO LIKES (USER_ID, POST_ID) VALUES (12, 10);
+
+INSERT INTO LIKES (USER_ID, POST_ID) VALUES (13, 2);
+
+INSERT INTO LIKES (USER_ID, POST_ID) VALUES (13, 8);
+
+INSERT INTO LIKES (USER_ID, POST_ID) VALUES (13, 20);
+
+INSERT INTO LIKES (USER_ID, POST_ID) VALUES (13, 21);
+
+INSERT INTO LIKES (USER_ID, POST_ID) VALUES (14, 1);
+
+INSERT INTO LIKES (USER_ID, POST_ID) VALUES (14, 12);
+
+INSERT INTO LIKES (USER_ID, POST_ID) VALUES (14, 16);
+
+INSERT INTO LIKES (USER_ID, POST_ID) VALUES (14, 23);
+
+INSERT INTO LIKES (USER_ID, POST_ID) VALUES (15, 6);
+
+INSERT INTO LIKES (USER_ID, POST_ID) VALUES (15, 11);
+
+INSERT INTO LIKES (USER_ID, POST_ID) VALUES (15, 18);
+
+INSERT INTO LIKES (USER_ID, POST_ID) VALUES (15, 24);
+
+INSERT INTO LIKES (USER_ID, POST_ID) VALUES (15, 25);
+
+INSERT INTO LIKES (USER_ID, POST_ID) VALUES (16, 3);
+
+INSERT INTO LIKES (USER_ID, POST_ID) VALUES (16, 9);
+
+INSERT INTO LIKES (USER_ID, POST_ID) VALUES (16, 14);
+
+INSERT INTO LIKES (USER_ID, POST_ID) VALUES (16, 21);
+
+INSERT INTO LIKES (USER_ID, POST_ID) VALUES (17, 4);
+
+INSERT INTO LIKES (USER_ID, POST_ID) VALUES (17, 10);
+
+INSERT INTO LIKES (USER_ID, POST_ID) VALUES (17, 19);
+
+INSERT INTO LIKES (USER_ID, POST_ID) VALUES (17, 24);
+
+INSERT INTO LIKES (USER_ID, POST_ID) VALUES (18, 1);
+
+INSERT INTO LIKES (USER_ID, POST_ID) VALUES (18, 7);
+
+INSERT INTO LIKES (USER_ID, POST_ID) VALUES (18, 12);
+
+INSERT INTO LIKES (USER_ID, POST_ID) VALUES (19, 6);
+
+INSERT INTO LIKES (USER_ID, POST_ID) VALUES (19, 11);
+
+INSERT INTO LIKES (USER_ID, POST_ID) VALUES (19, 16);
+
+INSERT INTO LIKES (USER_ID, POST_ID) VALUES (19, 23);
+
+INSERT INTO LIKES (USER_ID, POST_ID) VALUES (20, 2);
+
+INSERT INTO LIKES (USER_ID, POST_ID) VALUES (20, 8);
+
+INSERT INTO LIKES (USER_ID, POST_ID) VALUES (20, 13);
+
+INSERT INTO LIKES (USER_ID, POST_ID) VALUES (20, 21);
+
+INSERT INTO LIKES (USER_ID, POST_ID) VALUES (21, 27);
+
+INSERT INTO LIKES (USER_ID, POST_ID) VALUES (21, 28);
+
+INSERT INTO LIKES (USER_ID, POST_ID) VALUES (21, 31);
+
+INSERT INTO LIKES (USER_ID, POST_ID) VALUES (21, 29);
+
+INSERT INTO LIKES (USER_ID, POST_ID) VALUES (21, 7);
+
+INSERT INTO LIKES (USER_ID, POST_ID) VALUES (21, 1);
+
+INSERT INTO LIKES (USER_ID, POST_ID) VALUES (22, 27);
+
+INSERT INTO LIKES (USER_ID, POST_ID) VALUES (22, 28);
+
+INSERT INTO LIKES (USER_ID, POST_ID) VALUES (22, 31);
+
+INSERT INTO LIKES (USER_ID, POST_ID) VALUES (22, 30);
+
+COMMIT;
+
+-- ============================================================
+-- Komentarze
+-- ============================================================
+INSERT INTO
+    COMMENTS (
+        USER_ID,
+        POST_ID,
+        CONTENT,
+        COMMENTED_AT
+    )
+VALUES (
+        3,
+        1,
+        'Moj pies robi to samo! Niespodziewanie otwieral lodowke w nocy :D',
+        TIMESTAMP '2025-01-05 09:00:00'
+    );
+
+INSERT INTO
+    COMMENTS (
+        USER_ID,
+        POST_ID,
+        CONTENT,
+        COMMENTED_AT
+    )
+VALUES (
+        12,
+        1,
+        'Jakis sposob zeby go oduczyc? U mnie podobna sytuacja z kotem.',
+        TIMESTAMP '2025-01-05 10:00:00'
+    );
+
+INSERT INTO
+    COMMENTS (
+        USER_ID,
+        POST_ID,
+        CONTENT,
+        COMMENTED_AT
+    )
+VALUES (
+        18,
+        1,
+        'Absolutnie urocze! Kotki i pieski to najlepszy content.',
+        TIMESTAMP '2025-01-05 11:00:00'
+    );
+
+INSERT INTO
+    COMMENTS (
+        USER_ID,
+        POST_ID,
+        CONTENT,
+        COMMENTED_AT
+    )
+VALUES (
+        4,
+        2,
+        'Majranek to klucz! Moja babcia mowi to samo od lat.',
+        TIMESTAMP '2025-01-06 10:00:00'
+    );
+
+INSERT INTO
+    COMMENTS (
+        USER_ID,
+        POST_ID,
+        CONTENT,
+        COMMENTED_AT
+    )
+VALUES (
+        8,
+        2,
+        'Dzieki za przepis, zrobilam dzisiaj – rewelacja!',
+        TIMESTAMP '2025-01-06 18:00:00'
+    );
+
+INSERT INTO
+    COMMENTS (
+        USER_ID,
+        POST_ID,
+        CONTENT,
+        COMMENTED_AT
+    )
+VALUES (
+        20,
+        2,
+        'Dodaje jeszcze lyzeczke miodu i jest bosko.',
+        TIMESTAMP '2025-01-06 20:00:00'
+    );
+
+INSERT INTO
+    COMMENTS (
+        USER_ID,
+        POST_ID,
+        CONTENT,
+        COMMENTED_AT
+    )
+VALUES (
+        9,
+        3,
+        'Zgadzam sie w 100%! Nowy album to cos zupelnie innego.',
+        TIMESTAMP '2025-01-07 12:00:00'
+    );
+
+INSERT INTO
+    COMMENTS (
+        USER_ID,
+        POST_ID,
+        CONTENT,
+        COMMENTED_AT
+    )
+VALUES (
+        16,
+        3,
+        'Musze w koncu posłuchac, wszyscy polecaja.',
+        TIMESTAMP '2025-01-07 14:00:00'
+    );
+
+INSERT INTO
+    COMMENTS (
+        USER_ID,
+        POST_ID,
+        CONTENT,
+        COMMENTED_AT
+    )
+VALUES (
+        5,
+        6,
+        'iPhone 17 to przeplatanie z poprzednia generacja, nie warto.',
+        TIMESTAMP '2025-01-09 15:00:00'
+    );
+
+INSERT INTO
+    COMMENTS (
+        USER_ID,
+        POST_ID,
+        CONTENT,
+        COMMENTED_AT
+    )
+VALUES (
+        19,
+        6,
+        'Wole Androida ale uczciwa recenzja, szacun.',
+        TIMESTAMP '2025-01-09 16:30:00'
+    );
+
+INSERT INTO
+    COMMENTS (
+        USER_ID,
+        POST_ID,
+        CONTENT,
+        COMMENTED_AT
+    )
+VALUES (
+        6,
+        16,
+        'Swietna analiza! 4-dniowy tydzien pracy to jedyne rozwiazanie.',
+        TIMESTAMP '2025-02-01 10:00:00'
+    );
+
+INSERT INTO
+    COMMENTS (
+        USER_ID,
+        POST_ID,
+        CONTENT,
+        COMMENTED_AT
+    )
+VALUES (
+        11,
+        16,
+        'Ciekawy punkt widzenia, ale kto za to zaplace pracodawcy?',
+        TIMESTAMP '2025-02-01 11:00:00'
+    );
+
+INSERT INTO
+    COMMENTS (
+        USER_ID,
+        POST_ID,
+        CONTENT,
+        COMMENTED_AT
+    )
+VALUES (
+        2,
+        16,
+        'Kraje ktore to wprowadzily notuja wzrost produktywnosci.',
+        TIMESTAMP '2025-02-01 12:00:00'
+    );
+
+INSERT INTO
+    COMMENTS (
+        USER_ID,
+        POST_ID,
+        CONTENT,
+        COMMENTED_AT
+    )
+VALUES (
+        4,
+        20,
+        'Nareszcie ktos patrzy na to bez ideologii – dobry tekst.',
+        TIMESTAMP '2025-02-05 14:00:00'
+    );
+
+INSERT INTO
+    COMMENTS (
+        USER_ID,
+        POST_ID,
+        CONTENT,
+        COMMENTED_AT
+    )
+VALUES (
+        13,
+        21,
+        'Potrzebujemy wiecej takich analiz w debacie publicznej.',
+        TIMESTAMP '2025-02-06 16:00:00'
+    );
+
+COMMIT;
+
+-- ============================================================
+-- Udostepnienia
+-- ============================================================
+INSERT INTO
+    SHARES (
+        FROM_USER_ID,
+        POST_ID,
+        TO_USER_ID,
+        SHARED_AT
+    )
+VALUES (
+        2,
+        1,
+        7,
+        TIMESTAMP '2025-01-05 12:00:00'
+    );
+
+INSERT INTO
+    SHARES (
+        FROM_USER_ID,
+        POST_ID,
+        TO_USER_ID,
+        SHARED_AT
+    )
+VALUES (
+        2,
+        16,
+        6,
+        TIMESTAMP '2025-02-01 13:00:00'
+    );
+
+INSERT INTO
+    SHARES (
+        FROM_USER_ID,
+        POST_ID,
+        TO_USER_ID,
+        SHARED_AT
+    )
+VALUES (
+        2,
+        16,
+        14,
+        TIMESTAMP '2025-02-01 13:05:00'
+    );
+
+INSERT INTO
+    SHARES (
+        FROM_USER_ID,
+        POST_ID,
+        TO_USER_ID,
+        SHARED_AT
+    )
+VALUES (
+        3,
+        18,
+        11,
+        TIMESTAMP '2025-02-03 10:00:00'
+    );
+
+INSERT INTO
+    SHARES (
+        FROM_USER_ID,
+        POST_ID,
+        TO_USER_ID,
+        SHARED_AT
+    )
+VALUES (
+        3,
+        18,
+        15,
+        TIMESTAMP '2025-02-03 10:05:00'
+    );
+
+INSERT INTO
+    SHARES (
+        FROM_USER_ID,
+        POST_ID,
+        TO_USER_ID,
+        SHARED_AT
+    )
+VALUES (
+        3,
+        19,
+        17,
+        TIMESTAMP '2025-02-04 09:00:00'
+    );
+
+INSERT INTO
+    SHARES (
+        FROM_USER_ID,
+        POST_ID,
+        TO_USER_ID,
+        SHARED_AT
+    )
+VALUES (
+        11,
+        19,
+        3,
+        TIMESTAMP '2025-02-04 11:00:00'
+    );
+
+INSERT INTO
+    SHARES (
+        FROM_USER_ID,
+        POST_ID,
+        TO_USER_ID,
+        SHARED_AT
+    )
+VALUES (
+        6,
+        23,
+        2,
+        TIMESTAMP '2025-02-07 10:00:00'
+    );
+
+INSERT INTO
+    SHARES (
+        FROM_USER_ID,
+        POST_ID,
+        TO_USER_ID,
+        SHARED_AT
+    )
+VALUES (
+        6,
+        23,
+        7,
+        TIMESTAMP '2025-02-07 10:02:00'
+    );
+
+INSERT INTO
+    SHARES (
+        FROM_USER_ID,
+        POST_ID,
+        TO_USER_ID,
+        SHARED_AT
+    )
+VALUES (
+        4,
+        20,
+        NULL,
+        TIMESTAMP '2025-02-05 15:00:00'
+    );
+
+INSERT INTO
+    SHARES (
+        FROM_USER_ID,
+        POST_ID,
+        TO_USER_ID,
+        SHARED_AT
+    )
+VALUES (
+        13,
+        21,
+        NULL,
+        TIMESTAMP '2025-02-06 17:00:00'
+    );
+
+INSERT INTO
+    SHARES (
+        FROM_USER_ID,
+        POST_ID,
+        TO_USER_ID,
+        SHARED_AT
+    )
+VALUES (
+        9,
+        3,
+        16,
+        TIMESTAMP '2025-01-07 15:00:00'
+    );
+
+INSERT INTO
+    SHARES (
+        FROM_USER_ID,
+        POST_ID,
+        TO_USER_ID,
+        SHARED_AT
+    )
+VALUES (
+        8,
+        2,
+        20,
+        TIMESTAMP '2025-01-06 19:00:00'
+    );
+
+INSERT INTO
+    SHARES (
+        FROM_USER_ID,
+        POST_ID,
+        TO_USER_ID,
+        SHARED_AT
+    )
+VALUES (
+        21,
+        27,
+        NULL,
+        TIMESTAMP '2025-03-01 02:00:00'
+    );
+
+INSERT INTO
+    SHARES (
+        FROM_USER_ID,
+        POST_ID,
+        TO_USER_ID,
+        SHARED_AT
+    )
+VALUES (
+        21,
+        28,
+        22,
+        TIMESTAMP '2025-03-02 03:00:00'
+    );
+
+COMMIT;
+
+-- ============================================================
+-- Czasy ogladania postow
+-- ============================================================
+INSERT INTO
+    POST_VIEWS (
+        USER_ID,
+        POST_ID,
+        VIEW_START,
+        VIEW_END
+    )
+VALUES (
+        2,
+        1,
+        TIMESTAMP '2025-01-05 08:10:00',
+        TIMESTAMP '2025-01-05 08:14:30'
+    );
+
+INSERT INTO
+    POST_VIEWS (
+        USER_ID,
+        POST_ID,
+        VIEW_START,
+        VIEW_END
+    )
+VALUES (
+        3,
+        2,
+        TIMESTAMP '2025-01-06 09:00:00',
+        TIMESTAMP '2025-01-06 09:06:00'
+    );
+
+INSERT INTO
+    POST_VIEWS (
+        USER_ID,
+        POST_ID,
+        VIEW_START,
+        VIEW_END
+    )
+VALUES (
+        4,
+        3,
+        TIMESTAMP '2025-01-07 10:10:00',
+        TIMESTAMP '2025-01-07 10:13:00'
+    );
+
+INSERT INTO
+    POST_VIEWS (
+        USER_ID,
+        POST_ID,
+        VIEW_START,
+        VIEW_END
+    )
+VALUES (
+        5,
+        6,
+        TIMESTAMP '2025-01-09 12:05:00',
+        TIMESTAMP '2025-01-09 12:09:00'
+    );
+
+INSERT INTO
+    POST_VIEWS (
+        USER_ID,
+        POST_ID,
+        VIEW_START,
+        VIEW_END
+    )
+VALUES (
+        6,
+        16,
+        TIMESTAMP '2025-02-01 09:00:00',
+        TIMESTAMP '2025-02-01 09:08:00'
+    );
+
+INSERT INTO
+    POST_VIEWS (
+        USER_ID,
+        POST_ID,
+        VIEW_START,
+        VIEW_END
+    )
+VALUES (
+        11,
+        19,
+        TIMESTAMP '2025-02-04 08:05:00',
+        TIMESTAMP '2025-02-04 08:12:00'
+    );
+
+INSERT INTO
+    POST_VIEWS (
+        USER_ID,
+        POST_ID,
+        VIEW_START,
+        VIEW_END
+    )
+VALUES (
+        13,
+        21,
+        TIMESTAMP '2025-02-06 14:00:00',
+        TIMESTAMP '2025-02-06 14:10:00'
+    );
+
+INSERT INTO
+    POST_VIEWS (
+        USER_ID,
+        POST_ID,
+        VIEW_START,
+        VIEW_END
+    )
+VALUES (
+        21,
+        27,
+        TIMESTAMP '2025-03-01 01:00:00',
+        TIMESTAMP '2025-03-01 01:15:00'
+    );
+
+INSERT INTO
+    POST_VIEWS (
+        USER_ID,
+        POST_ID,
+        VIEW_START,
+        VIEW_END
+    )
+VALUES (
+        22,
+        27,
+        TIMESTAMP '2025-03-01 01:30:00',
+        TIMESTAMP '2025-03-01 01:48:00'
+    );
+
+INSERT INTO
+    POST_VIEWS (
+        USER_ID,
+        POST_ID,
+        VIEW_START,
+        VIEW_END
+    )
+VALUES (
+        9,
+        9,
+        TIMESTAMP '2025-01-12 08:10:00',
+        TIMESTAMP '2025-01-12 08:16:00'
+    );
+
+INSERT INTO
+    POST_VIEWS (
+        USER_ID,
+        POST_ID,
+        VIEW_START,
+        VIEW_END
+    )
+VALUES (
+        16,
+        3,
+        TIMESTAMP '2025-01-07 14:00:00',
+        TIMESTAMP '2025-01-07 14:05:00'
+    );
+
+INSERT INTO
+    POST_VIEWS (
+        USER_ID,
+        POST_ID,
+        VIEW_START,
+        VIEW_END
+    )
+VALUES (
+        8,
+        2,
+        TIMESTAMP '2025-01-06 16:00:00',
+        TIMESTAMP '2025-01-06 16:07:00'
+    );
+
+INSERT INTO
+    POST_VIEWS (
+        USER_ID,
+        POST_ID,
+        VIEW_START,
+        VIEW_END
+    )
+VALUES (
+        4,
+        20,
+        TIMESTAMP '2025-02-05 12:00:00',
+        TIMESTAMP '2025-02-05 12:11:00'
+    );
+
+INSERT INTO
+    POST_VIEWS (
+        USER_ID,
+        POST_ID,
+        VIEW_START,
+        VIEW_END
+    )
+VALUES (
+        2,
+        7,
+        TIMESTAMP '2025-01-10 14:25:00',
+        TIMESTAMP '2025-01-10 14:27:30'
+    );
+
+COMMIT;

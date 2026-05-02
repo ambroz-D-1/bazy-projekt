@@ -1,0 +1,251 @@
+-- ============================================================
+-- Baza: Oracle Autonomous Database (Free Tier)
+-- Uruchamiac wpierw jako uzytkownik ADMIN w SQL Developer Web
+-- ============================================================
+
+CREATE SEQUENCE SEQ_USERS START
+WITH
+    1 INCREMENT BY 1 NOCACHE NOCYCLE;
+
+CREATE SEQUENCE SEQ_POSTS START
+WITH
+    1 INCREMENT BY 1 NOCACHE NOCYCLE;
+
+CREATE SEQUENCE SEQ_CATEGORIES START
+WITH
+    1 INCREMENT BY 1 NOCACHE NOCYCLE;
+
+CREATE SEQUENCE SEQ_REASONS START
+WITH
+    1 INCREMENT BY 1 NOCACHE NOCYCLE;
+
+CREATE SEQUENCE SEQ_LIKES START
+WITH
+    1 INCREMENT BY 1 NOCACHE NOCYCLE;
+
+CREATE SEQUENCE SEQ_COMMENTS START
+WITH
+    1 INCREMENT BY 1 NOCACHE NOCYCLE;
+
+CREATE SEQUENCE SEQ_SHARES START
+WITH
+    1 INCREMENT BY 1 NOCACHE NOCYCLE;
+
+CREATE SEQUENCE SEQ_VIEWS START
+WITH
+    1 INCREMENT BY 1 NOCACHE NOCYCLE;
+
+CREATE SEQUENCE SEQ_PROFILES START
+WITH
+    1 INCREMENT BY 1 NOCACHE NOCYCLE;
+
+CREATE SEQUENCE SEQ_ROLES START
+WITH
+    1 INCREMENT BY 1 NOCACHE NOCYCLE;
+
+-- ============================================================
+-- Role uzytkownikow (hierarchia: Admin, UzytkownikWidok)
+-- UML: Rola <|-- Admin, Rola <|-- UzytkownikWidok
+-- ============================================================
+CREATE TABLE ROLES (
+    ROLE_ID NUMBER DEFAULT SEQ_ROLES.NEXTVAL PRIMARY KEY,
+    NAME VARCHAR2 (50) NOT NULL UNIQUE,
+    DESCRIPTION VARCHAR2 (200),
+    CAN_ACCESS_ALL NUMBER (1) DEFAULT 0 CHECK (CAN_ACCESS_ALL IN (0, 1)),
+    CAN_VIEW_OWN_INTERACTIONS NUMBER (1) DEFAULT 1 CHECK (
+        CAN_VIEW_OWN_INTERACTIONS IN (0, 1)
+    )
+);
+
+-- ============================================================
+-- Slownik: Kategorie postow
+-- ============================================================
+CREATE TABLE POST_CATEGORIES (
+    CATEGORY_ID NUMBER DEFAULT SEQ_CATEGORIES.NEXTVAL PRIMARY KEY,
+    NAME VARCHAR2 (100) NOT NULL UNIQUE,
+    DESCRIPTION VARCHAR2 (500),
+    IS_POLITICAL NUMBER (1) DEFAULT 0 CHECK (IS_POLITICAL IN (0, 1)),
+    POLITICAL_LEAN VARCHAR2 (20) CHECK (
+        POLITICAL_LEAN IN (
+            'LEFT',
+            'RIGHT',
+            'CENTER',
+            'EXTREMIST'
+        )
+        OR POLITICAL_LEAN IS NULL
+    )
+);
+
+-- ============================================================
+-- Slownik: Powody szczegolnej uwagi
+-- ============================================================
+CREATE TABLE SPECIAL_ATTENTION_REASONS (
+    REASON_ID NUMBER DEFAULT SEQ_REASONS.NEXTVAL PRIMARY KEY,
+    NAME VARCHAR2 (100) NOT NULL UNIQUE,
+    DESCRIPTION VARCHAR2 (500),
+    SEVERITY_LEVEL NUMBER (1) NOT NULL CHECK (
+        SEVERITY_LEVEL BETWEEN 1 AND 5
+    )
+);
+
+-- ============================================================
+-- Uzytkownicy
+-- ============================================================
+CREATE TABLE USERS (
+    USER_ID NUMBER DEFAULT SEQ_USERS.NEXTVAL PRIMARY KEY,
+    FIRST_NAME VARCHAR2 (100) NOT NULL,
+    LAST_NAME VARCHAR2 (100) NOT NULL,
+    EMAIL VARCHAR2 (255) NOT NULL UNIQUE,
+    CREATED_AT TIMESTAMP DEFAULT SYSTIMESTAMP,
+    STATUS VARCHAR2 (20) DEFAULT 'ACTIVE' CHECK (
+        STATUS IN (
+            'ACTIVE',
+            'SUSPENDED',
+            'DELETED',
+            'WATCHED'
+        )
+    ),
+    ROLE_ID NUMBER DEFAULT 2 REFERENCES ROLES (ROLE_ID)
+);
+
+-- ============================================================
+-- Posty
+-- ============================================================
+CREATE TABLE POSTS (
+    POST_ID NUMBER DEFAULT SEQ_POSTS.NEXTVAL PRIMARY KEY,
+    AUTHOR_ID NUMBER NOT NULL REFERENCES USERS (USER_ID),
+    CATEGORY_ID NUMBER NOT NULL REFERENCES POST_CATEGORIES (CATEGORY_ID),
+    REASON_ID NUMBER REFERENCES SPECIAL_ATTENTION_REASONS (REASON_ID),
+    SEVERITY_SCORE NUMBER (1) CHECK (
+        SEVERITY_SCORE BETWEEN 1 AND 5
+    ),
+    CONTENT_SUMMARY VARCHAR2 (500) NOT NULL,
+    CREATED_AT TIMESTAMP DEFAULT SYSTIMESTAMP,
+    IS_FLAGGED NUMBER (1) DEFAULT 0 CHECK (IS_FLAGGED IN (0, 1))
+);
+
+-- ============================================================
+-- Polubienia (Interakcja typ=LIKE)
+-- UML: Polubienie extends Interakcja; czasSpedzonyNaPoscie -> TIME_SPENT_SEC
+-- ============================================================
+CREATE TABLE LIKES (
+    LIKE_ID NUMBER DEFAULT SEQ_LIKES.NEXTVAL PRIMARY KEY,
+    USER_ID NUMBER NOT NULL REFERENCES USERS (USER_ID),
+    POST_ID NUMBER NOT NULL REFERENCES POSTS (POST_ID),
+    LIKED_AT TIMESTAMP DEFAULT SYSTIMESTAMP,
+    TIME_SPENT_SEC NUMBER CHECK (TIME_SPENT_SEC >= 0),
+    CONSTRAINT UQ_LIKE UNIQUE (USER_ID, POST_ID)
+);
+
+-- ============================================================
+-- Komentarze (Interakcja typ=COMMENT)
+-- UML: Komentarz extends Interakcja; tresc -> CONTENT; czasSpedzonyNaPoscie -> TIME_SPENT_SEC
+-- ============================================================
+CREATE TABLE COMMENTS (
+    COMMENT_ID NUMBER DEFAULT SEQ_COMMENTS.NEXTVAL PRIMARY KEY,
+    USER_ID NUMBER NOT NULL REFERENCES USERS (USER_ID),
+    POST_ID NUMBER NOT NULL REFERENCES POSTS (POST_ID),
+    CONTENT VARCHAR2 (2000) NOT NULL,
+    COMMENTED_AT TIMESTAMP DEFAULT SYSTIMESTAMP,
+    TIME_SPENT_SEC NUMBER CHECK (TIME_SPENT_SEC >= 0)
+);
+
+-- ============================================================
+-- Udostepnienia (Interakcja typ=SHARE)
+-- UML: Udostepnienie extends Interakcja; udostepniaKomu -> TO_USER_ID; czasSpedzonyNaPoscie -> TIME_SPENT_SEC
+-- ============================================================
+CREATE TABLE SHARES (
+    SHARE_ID NUMBER DEFAULT SEQ_SHARES.NEXTVAL PRIMARY KEY,
+    FROM_USER_ID NUMBER NOT NULL REFERENCES USERS (USER_ID),
+    POST_ID NUMBER NOT NULL REFERENCES POSTS (POST_ID),
+    TO_USER_ID NUMBER REFERENCES USERS (USER_ID),
+    SHARED_AT TIMESTAMP DEFAULT SYSTIMESTAMP,
+    TIME_SPENT_SEC NUMBER CHECK (TIME_SPENT_SEC >= 0)
+);
+
+-- ============================================================
+-- Czas spedzony na poscie
+-- ============================================================
+CREATE TABLE POST_VIEWS (
+    VIEW_ID NUMBER DEFAULT SEQ_VIEWS.NEXTVAL PRIMARY KEY,
+    USER_ID NUMBER NOT NULL REFERENCES USERS (USER_ID),
+    POST_ID NUMBER NOT NULL REFERENCES POSTS (POST_ID),
+    VIEW_START TIMESTAMP NOT NULL,
+    VIEW_END TIMESTAMP
+);
+
+-- ============================================================
+-- Profile behawioralne uzytkownikow
+-- UML: ProfilAnalityczny – pelne odwzorowanie wszystkich atrybutow
+--   zainteresowania       -> PREFERRED_CATEGORY_ID + PREFERRED_TOPICS
+--   preferowanaTematyka   -> PREFERRED_TOPICS
+--   stopienZangazowania   -> ENGAGEMENT_SCORE (NUMBER) + ACTIVITY_PROFILE (etykieta)
+--   profilPogladow        -> POLITICAL_LEAN + POLITICAL_SCORE
+--   grupyPowiazan         -> SOCIAL_CLUSTER_ID
+--   wplywTrescNaOpiniaWczasie -> OPINION_INFLUENCE_TIMELINE
+--   profilAktywnosci      -> ACTIVITY_PROFILE
+--   digitalFingerprint    -> DIGITAL_FINGERPRINT
+-- ============================================================
+CREATE TABLE USER_PROFILES (
+    PROFILE_ID NUMBER DEFAULT SEQ_PROFILES.NEXTVAL PRIMARY KEY,
+    USER_ID NUMBER NOT NULL UNIQUE REFERENCES USERS (USER_ID),
+    PREFERRED_CATEGORY_ID NUMBER REFERENCES POST_CATEGORIES (CATEGORY_ID),
+    PREFERRED_TOPICS VARCHAR2 (500),
+    ENGAGEMENT_SCORE NUMBER (5, 2) DEFAULT 0,
+    ACTIVITY_PROFILE VARCHAR2 (20) DEFAULT 'NISKA' CHECK (
+        ACTIVITY_PROFILE IN ('WYSOKA', 'SREDNIA', 'NISKA')
+        OR ACTIVITY_PROFILE IS NULL
+    ),
+    POLITICAL_LEAN VARCHAR2 (20) CHECK (
+        POLITICAL_LEAN IN (
+            'LEFT',
+            'RIGHT',
+            'CENTER',
+            'EXTREMIST',
+            'NONE'
+        )
+        OR POLITICAL_LEAN IS NULL
+    ),
+    POLITICAL_SCORE NUMBER (5, 2) DEFAULT 0,
+    EXTREMISM_EXPOSURE NUMBER (1) DEFAULT 0 CHECK (EXTREMISM_EXPOSURE IN (0, 1)),
+    SOCIAL_CLUSTER_ID NUMBER,
+    OPINION_INFLUENCE_TIMELINE VARCHAR2 (20) CHECK (
+        OPINION_INFLUENCE_TIMELINE IN (
+            'ROSNACA',
+            'STABILNA',
+            'MALEJACA'
+        )
+        OR OPINION_INFLUENCE_TIMELINE IS NULL
+    ),
+    DIGITAL_FINGERPRINT VARCHAR2 (64) UNIQUE,
+    LAST_UPDATED TIMESTAMP DEFAULT SYSTIMESTAMP
+);
+
+-- ============================================================
+-- Indeksy
+-- ============================================================
+CREATE INDEX IDX_POSTS_AUTHOR ON POSTS (AUTHOR_ID);
+
+CREATE INDEX IDX_POSTS_CATEGORY ON POSTS (CATEGORY_ID);
+
+CREATE INDEX IDX_POSTS_REASON ON POSTS (REASON_ID);
+
+CREATE INDEX IDX_LIKES_USER ON LIKES (USER_ID);
+
+CREATE INDEX IDX_LIKES_POST ON LIKES (POST_ID);
+
+CREATE INDEX IDX_COMMENTS_USER ON COMMENTS (USER_ID);
+
+CREATE INDEX IDX_COMMENTS_POST ON COMMENTS (POST_ID);
+
+CREATE INDEX IDX_SHARES_FROM ON SHARES (FROM_USER_ID);
+
+CREATE INDEX IDX_SHARES_TO ON SHARES (TO_USER_ID);
+
+CREATE INDEX IDX_VIEWS_USER ON POST_VIEWS (USER_ID);
+
+CREATE INDEX IDX_VIEWS_POST ON POST_VIEWS (POST_ID);
+
+CREATE INDEX IDX_PROFILES_USER ON USER_PROFILES (USER_ID);
+
+CREATE INDEX IDX_PROFILES_FINGERPRINT ON USER_PROFILES (DIGITAL_FINGERPRINT);
