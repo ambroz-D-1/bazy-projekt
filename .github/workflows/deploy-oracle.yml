@@ -1,49 +1,49 @@
 name: Deploy SQL to Oracle Autonomous Database
 
 on:
-    push:
-        branches: [ main ]
-        paths:
-            - "pegasus/sql/**"
-    workflow_dispatch:
+  push:
+    branches: [ main ]
+    paths:
+      - "pegasus/sql/**"
+  workflow_dispatch:
 
 jobs:
-    deploy:
-        runs-on: ubuntu-latest
+  deploy:
+    runs-on: ubuntu-latest
 
-        steps:
-            - name: Checkout repo
-              uses: actions/checkout@v4
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
 
-            - name: Setup Java (wymagane przez SQLcl)
-              uses: actions/setup-java@v4
-              with:
-                  distribution: temurin
-                  java-version: "21"
+      - name: Setup Java (wymagane przez SQLcl)
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
 
-            - name: Download SQLcl
-              run: |
-                  curl -sL https://download.oracle.com/otn_software/java/sqldeveloper/sqlcl-latest.zip -o sqlcl.zip
-                  unzip -q sqlcl.zip -d sqlcl
+      - name: Download SQLcl
+        run: |
+          curl -sL https://download.oracle.com/otn_software/java/sqldeveloper/sqlcl-latest.zip -o sqlcl.zip
+          unzip -q sqlcl.zip -d sqlcl
 
-            - name: Decode wallet
-              run: |
-                  echo "${{ secrets.ORACLE_WALLET_B64 }}" | base64 -d > wallet.zip
-                  mkdir -p wallet
-                  unzip -q wallet.zip -d wallet
+      - name: Decode wallet
+        run: |
+          echo "${{ secrets.ORACLE_WALLET_B64 }}" | base64 -d > wallet.zip
+          mkdir -p wallet
+          unzip -q wallet.zip -d wallet
 
-            - name: Run SQL scripts
-              env:
-                  ORACLE_PASSWORD: ${{ secrets.ORACLE_PASSWORD }}
-              run: |
-                  chmod +x sqlcl/sqlcl/bin/sql
+      - name: Run SQL scripts
+        env:
+          ORACLE_PASSWORD: ${{ secrets.ORACLE_PASSWORD }}
+        run: |
+          chmod +x sqlcl/sqlcl/bin/sql
 
-                  sqlcl/sqlcl/bin/sql -cloudconfig wallet.zip \
-                    ADMIN/"${ORACLE_PASSWORD}"@pegasusdb_high <<'EOF'
-                  -- Czyszczenie (drop if exists) i ponowne tworzenie
-                  @pegasus/sql/01_create_tables.sql
-                  @pegasus/sql/02_insert_test_data.sql
-                  @pegasus/sql/03_views_and_procedures.sql
-                  @pegasus/sql/04_demo_data.sql
-                  EXIT;
-                  EOF
+          sqlcl/sqlcl/bin/sql -cloudconfig wallet.zip \
+            ADMIN/"${ORACLE_PASSWORD}"@pegasusdb_high <<'EOF'
+          -- Czyszczenie (drop if exists) i ponowne tworzenie
+          @pegasus/sql/01_create_tables.sql
+          @pegasus/sql/02_insert_test_data.sql
+          @pegasus/sql/03_views_and_procedures.sql
+          @pegasus/sql/04_demo_data.sql
+          EXIT;
+          EOF
