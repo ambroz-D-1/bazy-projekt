@@ -19,7 +19,8 @@ import pytest
 import oracledb
 
 # ─── konfiguracja z env ────────────────────────────────────────────────────────
-SYS_PWD  = os.environ["ORACLE_SYS_PASSWORD"]
+# ORACLE_SYS_PASSWORD is used in CI; locally ORACLE_PASSWORD (from .env) is the same value.
+SYS_PWD  = os.environ.get("ORACLE_SYS_PASSWORD") or os.environ["ORACLE_PASSWORD"]
 PEG_PWD  = os.environ["PEGASUS_PASSWORD"]
 DB_HOST  = os.environ.get("DB_HOST",    "localhost")
 DB_PORT  = int(os.environ.get("DB_PORT", "1521"))

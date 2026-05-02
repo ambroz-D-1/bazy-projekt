@@ -39,7 +39,7 @@ pegasus/
     ├── 00_setup_schema.sql               ← tworzenie użytkownika PEGASUS (tylko lokalnie / XE)
     ├── 01_create_tables.sql              ← DDL: tabele, sekwencje, więzy
     ├── 02_insert_test_data.sql           ← dane testowe (słowniki + przykładowi użytkownicy)
-    ├── 03_views_and_procedures.sql       ← widoki analityczne + procedura SP_CALCULATE_PROFILE
+    ├── 03_views_and_procedures.sql       ← widoki analityczne + procedury SP_CALCULATE_USER_PROFILE, SP_CALCULATE_ALL_PROFILES, SP_BUILD_SOCIAL_CLUSTERS
     └── 04_demo_data.sql                  ← dane demo na zajęcia
 ```
 
@@ -108,7 +108,7 @@ pegasus/
 ```sql
 @01_create_tables.sql          -- tworzy tabele i sekwencje
 @02_insert_test_data.sql       -- słowniki i dane testowe
-@03_views_and_procedures.sql   -- widoki i procedura SP_CALCULATE_PROFILE
+@03_views_and_procedures.sql   -- widoki i procedury SP_CALCULATE_USER_PROFILE, SP_CALCULATE_ALL_PROFILES, SP_BUILD_SOCIAL_CLUSTERS
 @04_demo_data.sql              -- dane demo
 ```
 

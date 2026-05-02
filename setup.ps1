@@ -34,16 +34,13 @@ function Invoke-OracleSQL {
     param([string]$ConnStr, [string]$SqlText)
     $tmp = [System.IO.Path]::GetTempFileName() + ".sql"
     $utf8NoBom = New-Object System.Text.UTF8Encoding $false
-    [System.IO.File]::WriteAllText($tmp, $SqlText, $utf8NoBom)
+    $fullSql = "WHENEVER SQLERROR EXIT FAILURE ROLLBACK`r`n" + $SqlText
+    [System.IO.File]::WriteAllText($tmp, $fullSql, $utf8NoBom)
     docker cp $tmp "${CONTAINER}:/tmp/_run.sql" | Out-Null
     $out = docker exec -u oracle $CONTAINER sqlplus -L $ConnStr "@/tmp/_run.sql" 2>&1 | Out-String
     $ec = $LASTEXITCODE
     Remove-Item $tmp -ErrorAction SilentlyContinue
-    if ($out -match "ORA-|SP2-0") {
-        if ($out -notmatch "ORA-\d{5}" -and $out -match "succeeded|created|completed") {
-            return 0
-        }
-    }
+    if ($out -match "ORA-\d{5}") { return 1 }
     return $ec
 }
 
@@ -67,8 +64,8 @@ Write-Step "2/6" "Konfiguracja .env"
 # ---------------------------------------------
 if (-not (Test-Path $ENV_FILE)) {
     $pool = 'abcdefghjkmnpqrstuvwxyzABCDEFGHJKMNPQRSTUVWXYZ23456789'
-    $oraclePwd  = (-join (1..18 | ForEach-Object { $pool[(Get-Random -Maximum $pool.Length)] })) + "1a"
-    $pegasusPwd = (-join (1..18 | ForEach-Object { $pool[(Get-Random -Maximum $pool.Length)] })) + "2b"
+    $oraclePwd  = (-join (1..16 | ForEach-Object { $pool[(Get-Random -Maximum $pool.Length)] })) + "1Aa"
+    $pegasusPwd = (-join (1..16 | ForEach-Object { $pool[(Get-Random -Maximum $pool.Length)] })) + "2Bb"
     "ORACLE_PASSWORD=$oraclePwd`nPEGASUS_PASSWORD=$pegasusPwd`n" |
         Out-File $ENV_FILE -Encoding utf8 -NoNewline
     Write-OK "Plik .env wygenerowany z losowymi haslami"
@@ -116,6 +113,12 @@ Write-Step "5/6" "Tworze schemat PEGASUS"
 # ---------------------------------------------
 $sysConn = "sys/${oraclePwd}@localhost:1521/${ORACLE_SVC}"
 
+$resetClause = if ($Reset) {
+    "EXECUTE IMMEDIATE 'DROP USER PEGASUS CASCADE'; DBMS_OUTPUT.PUT_LINE('Stary schemat PEGASUS usunieto.');"
+} else {
+    "DBMS_OUTPUT.PUT_LINE('Schemat PEGASUS juz istnieje -- pomijam DROP (brak -Reset).');"
+}
+
 $createUser = @"
 SET SERVEROUTPUT ON
 DECLARE
@@ -123,8 +126,7 @@ DECLARE
 BEGIN
     SELECT COUNT(*) INTO v_exists FROM dba_users WHERE username = 'PEGASUS';
     IF v_exists > 0 THEN
-        EXECUTE IMMEDIATE 'DROP USER PEGASUS CASCADE';
-        DBMS_OUTPUT.PUT_LINE('Stary schemat PEGASUS usunieto.');
+        $resetClause
     END IF;
 END;
 /

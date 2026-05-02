@@ -19,7 +19,7 @@ services:
       start_period: 180s
 
   cloudbeaver:
-    image: dbeaver/cloudbeaver:latest
+    image: dbeaver/cloudbeaver:24.3.0
     container_name: pegasus-cloudbeaver
     ports:
       - "8978:8978"

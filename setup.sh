@@ -25,7 +25,8 @@ info() { echo -e "    \033[0;90m$1\033[0m"; }
 run_sql() {
   local conn="$1" sql="$2"
   local tmp; tmp=$(mktemp /tmp/pegasus_XXXXXX.sql)
-  printf '%s' "$sql" > "$tmp"
+  # WHENEVER SQLERROR EXIT ensures sqlplus returns non-zero on SQL errors
+  printf 'WHENEVER SQLERROR EXIT FAILURE ROLLBACK\n%s' "$sql" > "$tmp"
   docker cp "$tmp" "${CONTAINER}:/tmp/_run.sql"
   docker exec -u oracle "$CONTAINER" sqlplus -L "$conn" "@/tmp/_run.sql"
   local ec=$?
@@ -49,8 +50,8 @@ ok "Docker uruchomiony"
 step "2/6" "Konfiguracja .env"
 # ─────────────────────────────────────────────
 if [ ! -f "$ENV_FILE" ]; then
-  ORACLE_PWD="$(LC_ALL=C tr -dc 'a-zA-Z0-9' </dev/urandom | head -c 18)1a"
-  PEGASUS_PWD="$(LC_ALL=C tr -dc 'a-zA-Z0-9' </dev/urandom | head -c 18)2b"
+  ORACLE_PWD="$(LC_ALL=C tr -dc 'a-zA-Z0-9' </dev/urandom | head -c 16)1Aa"
+  PEGASUS_PWD="$(LC_ALL=C tr -dc 'a-zA-Z0-9' </dev/urandom | head -c 16)2Bb"
   printf 'ORACLE_PASSWORD=%s\nPEGASUS_PASSWORD=%s\n' "$ORACLE_PWD" "$PEGASUS_PWD" > "$ENV_FILE"
   ok "Plik .env wygenerowany z losowymi haslami"
 else
@@ -93,8 +94,12 @@ DECLARE
 BEGIN
     SELECT COUNT(*) INTO v_exists FROM dba_users WHERE username = 'PEGASUS';
     IF v_exists > 0 THEN
-        EXECUTE IMMEDIATE 'DROP USER PEGASUS CASCADE';
-        DBMS_OUTPUT.PUT_LINE('Stary schemat PEGASUS usunieto.');
+        IF ${RESET} = 1 THEN
+            EXECUTE IMMEDIATE 'DROP USER PEGASUS CASCADE';
+            DBMS_OUTPUT.PUT_LINE('Stary schemat PEGASUS usunieto.');
+        ELSE
+            DBMS_OUTPUT.PUT_LINE('Schemat PEGASUS juz istnieje – pomijam DROP (brak --reset).');
+        END IF;
     END IF;
 END;
 /
