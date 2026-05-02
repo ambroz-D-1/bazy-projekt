@@ -98,7 +98,7 @@ pegasus/
 ## Kolejność uruchamiania skryptów SQL
 
 ```sql
--- 1. Jako użytkownik ADMIN w SQL Developer Web:
+-- Jako użytkownik ADMIN w SQL Developer Web:
 @01_create_tables.sql          -- tworzy tabele i sekwencje
 @02_insert_test_data.sql       -- słowniki i dane testowe
 @03_views_and_procedures.sql   -- widoki i procedura SP_CALCULATE_PROFILE
