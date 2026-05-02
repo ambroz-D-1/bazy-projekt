@@ -34,11 +34,12 @@ Zbiera dane o interakcjach użytkowników z treściami (polubienia, komentarze, 
 ## Konwencje Git
 
 ```
-main       ← wersja prezentacyjna (tylko merge przez PR)
-feature/analiza-biznesowa
-feature/erd-model
-feature/analiza-behawioralna
-feature/oracle-wdrozenie
+main                              ← zostawiamy bez zmian
+pegasus                           ← wersja prezentacyjna (tylko merge przez PR)
+    feat/analiza-biznesowa-UML
+    feat/erd-model
+    feat/analiza-behawioralna-UML
+    feat/oracle-wdrozenie
 ```
 
-Każda osoba pracuje na swojej gałęzi i otwiera Pull Request do `main` po zakończeniu zadania.
+Każda osoba pracuje na swojej gałęzi feature i otwiera Pull Request do `pegasus` po zakończeniu zadania.
