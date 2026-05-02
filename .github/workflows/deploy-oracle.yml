@@ -7,6 +7,9 @@ on:
       - "pegasus/sql/**"
   workflow_dispatch:
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -40,7 +43,6 @@ jobs:
 
           sqlcl/sqlcl/bin/sql -cloudconfig wallet.zip \
             ADMIN/"${ORACLE_PASSWORD}"@pegasusdb_high <<'EOF'
-          -- Czyszczenie (drop if exists) i ponowne tworzenie
           @pegasus/sql/01_create_tables.sql
           @pegasus/sql/02_insert_test_data.sql
           @pegasus/sql/03_views_and_procedures.sql
