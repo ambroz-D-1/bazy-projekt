@@ -1,0 +1,48 @@
+@startuml
+title Diagram czynnosci – Obliczanie profilu behawioralnego uzytkownika
+
+|System analizy|
+start
+:Pobierz ID uzytkownika;
+:Pobierz wszystkie interakcje\n(polubienia, komentarze, udostepnienia);
+
+fork
+  :Policz polubienia\nwg kategorii postow;
+fork again
+  :Policz komentarze\nwg kategorii;
+fork again
+  :Policz udostepnienia\n(komu udostepnial);
+end fork
+
+:Wyznacz dominujaca kategorie\n(preferowana tematyka);
+:Oblicz engagement_score\n(polubienia x1 + komentarze x3 + udostepnienia x3);
+
+if (Czy interagowal\nz postami politycznymi?) then (tak)
+  :Pobierz liczby interakcji\nLEFT / RIGHT / EXTREMIST;
+  :Oblicz political_score\n= (prawe - lewe) / wszystkie * 100;
+  if (political_score < -30?) then (tak)
+    :political_lean = LEFT;
+  elseif (political_score > 30?) then (tak)
+    :political_lean = RIGHT;
+  elseif (EXTREMIST > 50%?) then (tak)
+    :political_lean = EXTREMIST;
+  else (nie)
+    :political_lean = CENTER;
+  endif
+else (nie)
+  :political_lean = NONE;
+  :political_score = 0;
+endif
+
+if (Czy lubil/udzielal\ntresci z severity >= 4?) then (tak)
+  :extremism_exposure = 1;
+  :Ustaw USERS.STATUS = 'WATCHED'\n(jesli STATUS = 'ACTIVE');
+  note right: Flaga ostrzezenia\ndla administratora
+else (nie)
+  :extremism_exposure = 0;
+endif
+
+:UPSERT do tabeli USER_PROFILES;
+:COMMIT;
+stop
+@enduml

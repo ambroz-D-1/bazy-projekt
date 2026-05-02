@@ -1,0 +1,30 @@
+@startuml
+title Diagram stanu – Status konta uzytkownika
+
+[*] --> Aktywny : Rejestracja w systemie
+
+Aktywny --> Obserwowany : extremism_exposure = 1\n(automatycznie przez system)
+Obserwowany --> Aktywny  : Admin zdejmuje flage
+
+Aktywny    --> Zawieszony : Admin zawiesza konto\n(decyzja moderacyjna)
+Obserwowany --> Zawieszony : Admin zawiesza konto
+
+Zawieszony --> Aktywny    : Admin przywraca konto
+
+Aktywny    --> Usuniety   : Usuniecie konta
+Zawieszony --> Usuniety   : Usuniecie konta
+Obserwowany --> Usuniety  : Usuniecie konta
+
+Usuniety --> [*]
+
+note right of Obserwowany
+  STATUS = 'WATCHED'
+  extremism_exposure = 1
+  Widoczny w panelu admina
+end note
+
+note right of Zawieszony
+  STATUS = 'SUSPENDED'
+  Uzytkownik nie moze\nwchodzic w interakcje
+end note
+@enduml

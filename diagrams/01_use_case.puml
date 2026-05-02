@@ -1,0 +1,52 @@
+@startuml
+title Diagram przypadkow uzycia – System Analizy Behawioralnej
+
+left to right direction
+skinparam actorStyle awesome
+skinparam packageStyle rectangle
+
+actor "Uzytkownik" as U
+actor "Administrator" as A
+actor "System analizy" as S
+
+rectangle "System Analizy Behawioralnej Platformy Spolecznosciowej" {
+
+  package "Dostep uzytkownika" {
+    usecase "Wyswietl wlasne polubienia"  as UC1
+    usecase "Wyswietl wlasne komentarze" as UC2
+  }
+
+  package "Zarzadzanie przez admina" {
+    usecase "Zarzadzaj uzytkownikami (CRUD)" as UC3
+    usecase "Zarzadzaj postami (CRUD)"       as UC4
+    usecase "Przegladaj interakcje"          as UC5
+    usecase "Przegladaj profile behawioralne" as UC6
+    usecase "Filtruj tresci szczegolnej uwagi" as UC7
+    usecase "Generuj raport uzytkownika"     as UC8
+  }
+
+  package "Analiza automatyczna" {
+    usecase "Oblicz profil behawioralny"     as UC9
+    usecase "Wykryj tresci ekstremistyczne"  as UC10
+    usecase "Buduj klastry uzytkownikow"     as UC11
+  }
+}
+
+U --> UC1
+U --> UC2
+
+A --> UC3
+A --> UC4
+A --> UC5
+A --> UC6
+A --> UC7
+A --> UC8
+
+S --> UC9
+S --> UC10
+S --> UC11
+
+UC6 ..> UC9  : <<include>>
+UC7 ..> UC10 : <<include>>
+UC8 ..> UC9  : <<include>>
+@enduml

@@ -1,0 +1,130 @@
+@startuml
+title Diagram ERD – System Analizy Behawioralnej
+
+skinparam linetype ortho
+hide circle
+
+entity "ROLES" as RO {
+  * ROLE_ID : NUMBER PK
+  --
+  NAME : VARCHAR2(50) UK
+  DESCRIPTION : VARCHAR2(200)
+  CAN_ACCESS_ALL : NUMBER(1)
+  CAN_VIEW_OWN_INTERACTIONS : NUMBER(1)
+}
+
+entity "USERS" as U {
+  * USER_ID : NUMBER PK
+  --
+  FIRST_NAME : VARCHAR2(100)
+  LAST_NAME : VARCHAR2(100)
+  EMAIL : VARCHAR2(255) UK
+  CREATED_AT : TIMESTAMP
+  STATUS : VARCHAR2(20)
+  ROLE_ID : NUMBER FK
+}
+
+entity "POST_CATEGORIES" as PC {
+  * CATEGORY_ID : NUMBER PK
+  --
+  NAME : VARCHAR2(100) UK
+  DESCRIPTION : VARCHAR2(500)
+  IS_POLITICAL : NUMBER(1)
+  POLITICAL_LEAN : VARCHAR2(20)
+}
+
+entity "SPECIAL_ATTENTION_REASONS" as R {
+  * REASON_ID : NUMBER PK
+  --
+  NAME : VARCHAR2(100) UK
+  DESCRIPTION : VARCHAR2(500)
+  SEVERITY_LEVEL : NUMBER(1)
+}
+
+entity "POSTS" as P {
+  * POST_ID : NUMBER PK
+  --
+  AUTHOR_ID : NUMBER FK
+  CATEGORY_ID : NUMBER FK
+  REASON_ID : NUMBER FK [null]
+  SEVERITY_SCORE : NUMBER(1) [null]
+  CONTENT_SUMMARY : VARCHAR2(500)
+  CREATED_AT : TIMESTAMP
+  IS_FLAGGED : NUMBER(1)
+}
+
+entity "LIKES" as L {
+  * LIKE_ID : NUMBER PK
+  --
+  USER_ID : NUMBER FK
+  POST_ID : NUMBER FK
+  LIKED_AT : TIMESTAMP
+  TIME_SPENT_SEC : NUMBER [null]
+}
+
+entity "COMMENTS" as C {
+  * COMMENT_ID : NUMBER PK
+  --
+  USER_ID : NUMBER FK
+  POST_ID : NUMBER FK
+  CONTENT : VARCHAR2(2000)
+  COMMENTED_AT : TIMESTAMP
+  TIME_SPENT_SEC : NUMBER [null]
+}
+
+entity "SHARES" as S {
+  * SHARE_ID : NUMBER PK
+  --
+  FROM_USER_ID : NUMBER FK
+  POST_ID : NUMBER FK
+  TO_USER_ID : NUMBER FK [null]
+  SHARED_AT : TIMESTAMP
+  TIME_SPENT_SEC : NUMBER [null]
+}
+
+entity "POST_VIEWS" as V {
+  * VIEW_ID : NUMBER PK
+  --
+  USER_ID : NUMBER FK
+  POST_ID : NUMBER FK
+  VIEW_START : TIMESTAMP
+  VIEW_END : TIMESTAMP [null]
+}
+
+entity "USER_PROFILES" as UP {
+  * PROFILE_ID : NUMBER PK
+  --
+  USER_ID : NUMBER FK UK
+  PREFERRED_CATEGORY_ID : NUMBER FK [null]
+  PREFERRED_TOPICS : VARCHAR2(500) [null]
+  ENGAGEMENT_SCORE : NUMBER(5,2)
+  ACTIVITY_PROFILE : VARCHAR2(20)
+  POLITICAL_LEAN : VARCHAR2(20)
+  POLITICAL_SCORE : NUMBER(5,2)
+  EXTREMISM_EXPOSURE : NUMBER(1)
+  SOCIAL_CLUSTER_ID : NUMBER [null]
+  OPINION_INFLUENCE_TIMELINE : VARCHAR2(20) [null]
+  DIGITAL_FINGERPRINT : VARCHAR2(64) UK [null]
+  LAST_UPDATED : TIMESTAMP
+}
+
+' Relacje
+U ||--o{ P  : "pisze"
+U ||--o{ L  : "lubi"
+U ||--o{ C  : "komentuje"
+U ||--o{ S  : "udostepnia (od)"
+U ||--o{ S  : "odbiera (do)"
+U ||--o{ V  : "ogladal"
+U ||--|| UP : "posiada profil"
+
+P }o--|| PC : "nalezy do kategorii"
+P }o--o| R  : "oznaczony powodem"
+P ||--o{ L  : "posiada polubienia"
+P ||--o{ C  : "posiada komentarze"
+P ||--o{ S  : "jest udostepniany"
+P ||--o{ V  : "jest oglądany"
+
+UP }o--o| PC : "preferuje kategorie"
+
+RO ||--o{ U  : "rola uzytkownika"
+@enduml

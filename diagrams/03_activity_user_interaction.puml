@@ -1,0 +1,41 @@
+@startuml
+title Diagram czynnosci – Interakcja uzytkownika z postem
+
+|Uzytkownik|
+|System platformy|
+
+|Uzytkownik|
+start
+:Otwiera post\n(klik/scroll);
+
+|System platformy|
+:Pobierz post z bazy;
+:Zapisz VIEW_START\ndo POST_VIEWS;
+:Wyswietl tresc posta;
+
+|Uzytkownik|
+:Przegladaj tresc;
+
+|Uzytkownik|
+:Wybierz akcje;
+
+|System platformy|
+:Zapisz VIEW_END do POST_VIEWS;
+
+if (Polubienie?) then (tak)
+  :INSERT INTO LIKES\n(USER_ID, POST_ID);
+endif
+
+if (Komentarz?) then (tak)
+  :Uzytkownik wpisuje tresc;
+  :INSERT INTO COMMENTS\n(USER_ID, POST_ID, CONTENT);
+endif
+
+if (Udostepnienie?) then (tak)
+  :Wybierz odbiorce\n(osoba lub publiczne);
+  :INSERT INTO SHARES\n(FROM_USER_ID, POST_ID, TO_USER_ID);
+endif
+
+:Wyzwol asynchroniczne\nprzeliczenie profilu\nbehawioralnego (SP_CALCULATE_USER_PROFILE);
+stop
+@enduml
