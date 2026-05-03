@@ -45,6 +45,213 @@ pegasus/
 
 ---
 
+## Diagramy UML
+
+### Model ERD
+
+```mermaid
+erDiagram
+  Uzytkownik {
+    int id PK
+    string imie
+    string nazwisko
+  }
+
+  Post {
+    int id PK
+    string kategoria
+    string powodSzczegolnejUwagi
+    int skalaEkstremalnosci
+  }
+
+  Interakcja {
+    int id PK
+    string typ
+    datetime czas
+    int czasSpedzonyNaPostie
+    int idUzytkownikaFK
+    int idPostuFK
+    int idAdresataFK
+  }
+
+  ProfilAnalityczny {
+    int idUzytkownikaFK PK
+    string zainteresowania
+    string preferowanaTematyka
+    string stopienZangazowania
+    string profilPogladowPolitycznych
+    string grupyPowiazanUzytkownikow
+    string wplywWczasie
+    string profilAktywnosci
+    string digitalFingerprint
+  }
+
+  KategoriaTreści {
+    string kategoria PK
+  }
+
+  PowodSzczegolnejUwagi {
+    string powod PK
+  }
+
+  KategoriaTreści ||--o{ Post : "zawiera"
+  PowodSzczegolnejUwagi ||--o{ Post : "opcjonalnie"
+  Uzytkownik ||--o{ Interakcja : "tworzy"
+  Post ||--o{ Interakcja : "dotyczy"
+  Uzytkownik ||--o{ Interakcja : "adresat (opcjonalnie)"
+  Uzytkownik ||--|| ProfilAnalityczny : "ma"
+```
+
+### Analiza biznesowa (przypadki użycia)
+
+```mermaid
+flowchart LR
+subgraph Aktorzy
+A1[Admin]
+A2[Użytkownik]
+end
+
+subgraph AdminCases
+U1[Zarządzaj użytkownikami]
+U2[Przeglądaj wszystkich użytkowników]
+U3[Przeglądaj wszystkie posty]
+U4[Przeglądaj wszystkie interakcje]
+U5[Przeglądaj profil analityczny]
+U6[Filtruj według profilu]
+U7[Eksportuj dane]
+U8[Oznacz post jako szczególnej uwagi]
+U9[Przeglądaj raporty ostrzeżeń]
+end
+
+subgraph UserCases
+U10[Logowanie]
+U11[Przeglądaj feed]
+U12[Polub post]
+U13[Skomentuj post]
+U14[Udostępnij post]
+U15[Przeglądaj polubione]
+U16[Przeglądaj komentarze]
+U17[Przeglądaj udostępnienia]
+U18[Rejestruj czas na poście]
+U19[Aktualizuj profil analityczny]
+U20[Buduj digital fingerprint]
+U21[Wykrywaj treści ekstremalne]
+U22[Generuj grupy powiązań]
+end
+
+%% Aktorzy do przypadków
+A1 --> U1 & U2 & U3 & U4 & U5 & U6 & U7 & U8 & U9
+A2 --> U10 & U11 & U12 & U13 & U14 & U15 & U16 & U17 & U18 & U19 & U20 & U21 & U22
+
+%% Include
+U13 -.-> U10
+U14 -.-> U10
+U12 -.-> U10
+U12 -.-> U19
+U13 -.-> U19
+U14 -.-> U19
+U11 -.-> U18
+
+%% Extend
+U11 -.-> U20
+U13 -.-> U21
+U13 -.-> U8
+```
+
+### Algorytm analizy behawioralnej (diagram klas)
+
+```mermaid
+classDiagram
+  %% PEGASUSownik - UML (analiza biznesowa i behawioralna dla bazy danych)
+
+  class Uzytkownik {
+    +id UUID
+    +imie string
+    +nazwisko string
+  }
+
+  class Post {
+    +id UUID
+    +kategoria string
+    +ekstremalnoscSkala number
+    +powodSzczegolnejUwagi string
+  }
+
+  class Interakcja {
+    +id UUID
+    +typ string
+    +czas datetime
+    +czasSpedzonyNaPoscie number
+  }
+
+  class Polubienie {
+    +id UUID
+    +typ string
+  }
+
+  class Komentarz {
+    +id UUID
+    +typ string
+    +tresc string
+  }
+
+  class Udostepnienie {
+    +id UUID
+    +typ string
+  }
+
+  class ProfilAnalityczny {
+    +idUzytkownika UUID
+    +zainteresowania string
+    +preferowanaTematyka string
+    +stopienZangazowania string
+    +profilPogladow string
+    +grupyPowiazan string
+    +wplywTrescNaOpiniaWczasie string
+    +profilAktywnosci string
+    +digitalFingerprint string
+  }
+
+  class Rola {
+    +nazwa string
+  }
+
+  class Admin {
+    +dostepDoWszystkiego()
+  }
+
+  class UzytkownikWidok {
+    +widziPolubionePosty()
+    +widziSwojeKomentarze()
+  }
+
+  %% Relationships
+  Uzytkownik "1" --> "0..*" Polubienie : wykonuje
+  Uzytkownik "1" --> "0..*" Komentarz : pisze
+  Uzytkownik "1" --> "0..*" Udostepnienie : udostepnia
+
+  Post "1" <-- "0..*" Polubienie : dotyczy
+  Post "1" <-- "0..*" Komentarz : dotyczy
+  Post "1" <-- "0..*" Udostepnienie : dotyczy
+
+  Komentarz --> Post : dotyczy
+  Udostepnienie --> Uzytkownik : udostepniaKomu
+
+  %% Interakcje as specializations
+  Interakcja <|-- Polubienie
+  Interakcja <|-- Komentarz
+  Interakcja <|-- Udostepnienie
+
+  %% Profile
+  Uzytkownik "1" --> "0..1" ProfilAnalityczny : ma
+
+  %% Roles access
+  Rola <|-- Admin
+  Rola <|-- UzytkownikWidok
+```
+
+---
+
 ## Schemat bazy danych
 
 ### Tabele
