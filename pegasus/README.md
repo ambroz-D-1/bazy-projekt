@@ -7,6 +7,16 @@ Implementacja na Oracle Autonomous Database (Free Tier) — SQL Developer Web.
 
 ---
 
+## Tech Stack
+
+<div align="center">
+
+![Oracle](https://img.shields.io/badge/Oracle-21c-F80000?logo=oracle&logoColor=white) ![PL/SQL](https://img.shields.io/badge/PL%2FSQL-SQL-336791?logo=oracle&logoColor=white) ![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker&logoColor=white) ![CloudBeaver](https://img.shields.io/badge/CloudBeaver-24.x-6C3483) ![Python](https://img.shields.io/badge/Python-3.x-3776AB?logo=python&logoColor=white) ![pytest](https://img.shields.io/badge/pytest-7.0%2B-0A9EDC?logo=pytest&logoColor=white) ![oracledb](https://img.shields.io/badge/oracledb-2.0%2B-F80000) ![PlantUML](https://img.shields.io/badge/PlantUML-diagrams-FBBD08) ![Mermaid](https://img.shields.io/badge/Mermaid-diagrams-FF3670) ![Status](https://img.shields.io/badge/Status-In%20Progress-yellow)
+
+</div>
+
+---
+
 ## Opis systemu
 
 Moduł analityczny osadzony w istniejącej platformie społecznościowej.  
