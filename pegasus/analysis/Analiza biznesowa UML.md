@@ -1,7 +1,7 @@
 # Analiza biznesowa UML
 
 ```mermaid
-flowchart TD
+flowchart LR
 subgraph Aktorzy
 A1[Admin]
 A2[Użytkownik]
