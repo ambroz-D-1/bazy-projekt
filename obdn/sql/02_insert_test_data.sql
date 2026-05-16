@@ -1,12 +1,7 @@
--- ============================================================
 -- Dane testowe – slowniki + uzytkownicy + nieruchomosci + interakcje
 -- Uruchamiac po 01_create_tables.sql
--- ============================================================
 
--- ============================================================
 -- Role uzytkownikow (7 rol)
--- UML: RolaUzytkownika <|-- Obywatel, Agent, Deweloper, Urzednik, Bank, Analityk
--- ============================================================
 INSERT INTO
     ROLE_UZYTKOWNIKOW (
         NAZWA,
@@ -135,9 +130,7 @@ VALUES (
 
 COMMIT;
 
--- ============================================================
 -- Przeznaczenie gruntow
--- ============================================================
 INSERT INTO
     PRZEZNACZENIE_GRUNTOW (NAZWA, OPIS)
 VALUES (
@@ -182,9 +175,7 @@ VALUES (
 
 COMMIT;
 
--- ============================================================
 -- Zrodla ogloszen (system + 4 portale zewnetrzne)
--- ============================================================
 INSERT INTO
     ZRODLA_OGLOSZEN (NAZWA, URL_BAZOWY, AKTYWNE)
 VALUES (
@@ -227,9 +218,7 @@ VALUES (
 
 COMMIT;
 
--- ============================================================
 -- Uzytkownicy (8 podstawowych – po jednym z kazdej roli)
--- ============================================================
 INSERT INTO
     USERS (IMIE, NAZWISKO, EMAIL, ROLA_ID)
 VALUES (
@@ -308,9 +297,7 @@ VALUES (
 
 COMMIT;
 
--- ============================================================
 -- Dzialki katastralne (3 dzialki)
--- ============================================================
 INSERT INTO
     DZIALKI (
         NUMER_EGIB,
@@ -379,9 +366,7 @@ VALUES (
 
 COMMIT;
 
--- ============================================================
 -- Budynki (po jednym na kazda dzialke)
--- ============================================================
 INSERT INTO
     BUDYNKI (
         DZIALKA_ID,
@@ -480,9 +465,7 @@ VALUES (
 
 COMMIT;
 
--- ============================================================
 -- Lokale (5 lokali w 3 budynkach)
--- ============================================================
 INSERT INTO
     LOKALE (
         BUDYNEK_ID,
@@ -605,9 +588,7 @@ VALUES (
 
 COMMIT;
 
--- ============================================================
 -- Ksiegi wieczyste
--- ============================================================
 INSERT INTO
     KSIEGI_WIECZYSTE (
         NUMER_KW,
@@ -652,9 +633,7 @@ VALUES (
 
 COMMIT;
 
--- ============================================================
 -- Historia wlasnosci
--- ============================================================
 -- Lokal 1 (45m2, Rozana 5/1 Wroclaw): Jan Kowalski od 2020
 INSERT INTO
     HISTORIA_WLASNOSCI (
@@ -712,9 +691,7 @@ VALUES (3, 2, 100, DATE '2023-01-01', 1);
 
 COMMIT;
 
--- ============================================================
 -- Hipoteki
--- ============================================================
 -- Lokal 1: PKO Bank (kupno na kredyt)
 INSERT INTO
     HIPOTEKI (
@@ -755,9 +732,7 @@ VALUES (
 
 COMMIT;
 
--- ============================================================
 -- Transakcje
--- ============================================================
 -- Lokal 3: sprzedaz Anna->Jan 2023-01-01
 INSERT INTO
     TRANSAKCJE (
@@ -829,9 +804,7 @@ VALUES (
 
 COMMIT;
 
--- ============================================================
 -- Ogloszenia (mix wlasnych i z portali, z dubletem)
--- ============================================================
 -- Lokal 1 na wynajem (Jan Kowalski, wlasny system)
 INSERT INTO
     OGLOSZENIA (
@@ -986,9 +959,7 @@ VALUES (
 
 COMMIT;
 
--- ============================================================
 -- Historia cen ogloszen
--- ============================================================
 -- Lokal 2: cena obnizyla sie z 480000 do 450000
 INSERT INTO
     HISTORIA_CEN_OGLOSZEN (

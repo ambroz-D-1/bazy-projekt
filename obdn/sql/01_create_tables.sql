@@ -1,7 +1,5 @@
--- ============================================================
--- Baza: Oracle Autonomous Database (Free Tier)
--- Uruchamiac wpierw jako uzytkownik ADMIN w SQL Developer Web
--- ============================================================
+-- OBDN – schemat bazy danych
+-- uruchamiac jako uzytkownik OBDN (nie ADMIN)
 
 CREATE SEQUENCE SEQ_ROLES START
 WITH
@@ -59,10 +57,7 @@ CREATE SEQUENCE SEQ_STATYSTYKI START
 WITH
     1 INCREMENT BY 1 NOCACHE NOCYCLE;
 
--- ============================================================
 -- Role uzytkownikow
--- UML: RolaUzytkownika <|-- Obywatel, Agent, Deweloper, Urzednik, Bank, Analityk
--- ============================================================
 CREATE TABLE ROLE_UZYTKOWNIKOW (
     ROLE_ID NUMBER DEFAULT SEQ_ROLES.NEXTVAL PRIMARY KEY,
     NAZWA VARCHAR2 (50) NOT NULL UNIQUE,
@@ -79,18 +74,14 @@ CREATE TABLE ROLE_UZYTKOWNIKOW (
     )
 );
 
--- ============================================================
 -- Slownik: Przeznaczenie gruntow
--- ============================================================
 CREATE TABLE PRZEZNACZENIE_GRUNTOW (
     PRZEZNACZENIE_ID NUMBER DEFAULT SEQ_PRZEZNACZENIE.NEXTVAL PRIMARY KEY,
     NAZWA VARCHAR2 (100) NOT NULL UNIQUE,
     OPIS VARCHAR2 (500)
 );
 
--- ============================================================
 -- Slownik: Zrodla ogloszen (system + portale zewnetrzne)
--- ============================================================
 CREATE TABLE ZRODLA_OGLOSZEN (
     ZRODLO_ID NUMBER DEFAULT SEQ_ZRODLA.NEXTVAL PRIMARY KEY,
     NAZWA VARCHAR2 (100) NOT NULL UNIQUE,
@@ -98,9 +89,7 @@ CREATE TABLE ZRODLA_OGLOSZEN (
     AKTYWNE NUMBER (1) DEFAULT 1 CHECK (AKTYWNE IN (0, 1))
 );
 
--- ============================================================
 -- Uzytkownicy systemu (6 rol + admin)
--- ============================================================
 CREATE TABLE USERS (
     USER_ID NUMBER DEFAULT SEQ_USERS.NEXTVAL PRIMARY KEY,
     IMIE VARCHAR2 (100) NOT NULL,
@@ -115,9 +104,7 @@ CREATE TABLE USERS (
     DATA_USUNIECIA TIMESTAMP
 );
 
--- ============================================================
 -- Dzialki katastralne (EGIB)
--- ============================================================
 CREATE TABLE DZIALKI (
     DZIALKA_ID NUMBER DEFAULT SEQ_DZIALKI.NEXTVAL PRIMARY KEY,
     NUMER_EGIB VARCHAR2 (50) NOT NULL UNIQUE,
@@ -131,9 +118,7 @@ CREATE TABLE DZIALKI (
     NUMER_KW VARCHAR2 (30)
 );
 
--- ============================================================
 -- Budynki
--- ============================================================
 CREATE TABLE BUDYNKI (
     BUDYNEK_ID NUMBER DEFAULT SEQ_BUDYNKI.NEXTVAL PRIMARY KEY,
     DZIALKA_ID NUMBER NOT NULL REFERENCES DZIALKI (DZIALKA_ID),
@@ -183,10 +168,7 @@ CREATE TABLE BUDYNKI (
     DZIELNICA VARCHAR2 (100)
 );
 
--- ============================================================
 -- Lokale mieszkalne i uzytkowe
--- UML: Lokal – metraz_m2, stan_wykonczenia, szacowana_wartosc
--- ============================================================
 CREATE TABLE LOKALE (
     LOKAL_ID NUMBER DEFAULT SEQ_LOKALE.NEXTVAL PRIMARY KEY,
     BUDYNEK_ID NUMBER NOT NULL REFERENCES BUDYNKI (BUDYNEK_ID),
@@ -216,9 +198,7 @@ CREATE TABLE LOKALE (
     SZACOWANA_WARTOSC NUMBER (15, 2)
 );
 
--- ============================================================
 -- Ksiegi wieczyste (EKW)
--- ============================================================
 CREATE TABLE KSIEGI_WIECZYSTE (
     KW_ID NUMBER DEFAULT SEQ_KW.NEXTVAL PRIMARY KEY,
     NUMER_KW VARCHAR2 (30) NOT NULL UNIQUE,
@@ -227,11 +207,9 @@ CREATE TABLE KSIEGI_WIECZYSTE (
     DATA_ZALOZENIA DATE
 );
 
--- ============================================================
 -- Historia wlasnosci (aktualny i historyczni wlasciciele)
 -- Jeden wiersz = jeden wlasciciel jednej nieruchomosci w danym przedziale czasu.
 -- Dokladnie jedno z pol: DZIALKA_ID, BUDYNEK_ID lub LOKAL_ID jest niepuste.
--- ============================================================
 CREATE TABLE HISTORIA_WLASNOSCI (
     HISTORIA_ID NUMBER DEFAULT SEQ_HISTORIA_WL.NEXTVAL PRIMARY KEY,
     DZIALKA_ID NUMBER REFERENCES DZIALKI (DZIALKA_ID),
@@ -247,10 +225,8 @@ CREATE TABLE HISTORIA_WLASNOSCI (
     AKTYWNA NUMBER (1) DEFAULT 1 CHECK (AKTYWNA IN (0, 1))
 );
 
--- ============================================================
 -- Hipoteki i obciazenia nieruchomosci
 -- Dokladnie jedno z pol: DZIALKA_ID, BUDYNEK_ID lub LOKAL_ID jest niepuste.
--- ============================================================
 CREATE TABLE HIPOTEKI (
     HIPOTEKA_ID NUMBER DEFAULT SEQ_HIPOTEKI.NEXTVAL PRIMARY KEY,
     DZIALKA_ID NUMBER REFERENCES DZIALKI (DZIALKA_ID),
@@ -264,11 +240,9 @@ CREATE TABLE HIPOTEKI (
     AKTYWNA NUMBER (1) DEFAULT 1 CHECK (AKTYWNA IN (0, 1))
 );
 
--- ============================================================
 -- Transakcje kupna/sprzedazy
 -- Dokladnie jedno z pol: DZIALKA_ID, BUDYNEK_ID lub LOKAL_ID jest niepuste.
 -- Dane historyczne przechowywane min. 10 lat – nieusuwalne przez zwyklych uzytkownikow.
--- ============================================================
 CREATE TABLE TRANSAKCJE (
     TRANSAKCJA_ID NUMBER DEFAULT SEQ_TRANSAKCJE.NEXTVAL PRIMARY KEY,
     DZIALKA_ID NUMBER REFERENCES DZIALKI (DZIALKA_ID),
@@ -283,10 +257,8 @@ CREATE TABLE TRANSAKCJE (
     NUMER_AKTU VARCHAR2 (100)
 );
 
--- ============================================================
 -- Ogloszenia (wlasne + importowane z portali)
 -- HASH_DEDUPLIKACJI obliczany przez SP_DEDUPLIKUJ_OGLOSZENIA
--- ============================================================
 CREATE TABLE OGLOSZENIA (
     OGLOSZENIE_ID NUMBER DEFAULT SEQ_OGLOSZENIA.NEXTVAL PRIMARY KEY,
     DZIALKA_ID NUMBER REFERENCES DZIALKI (DZIALKA_ID),
@@ -323,9 +295,7 @@ CREATE TABLE OGLOSZENIA (
 ALTER TABLE OGLOSZENIA
     ADD CONSTRAINT FK_OGL_GLOWNE FOREIGN KEY (DUPLIKAT_GLOWNEGO_ID) REFERENCES OGLOSZENIA (OGLOSZENIE_ID);
 
--- ============================================================
 -- Historia zmian cen ogloszen
--- ============================================================
 CREATE TABLE HISTORIA_CEN_OGLOSZEN (
     HISTORIA_CEN_ID NUMBER DEFAULT SEQ_HISTORIA_CEN.NEXTVAL PRIMARY KEY,
     OGLOSZENIE_ID NUMBER NOT NULL REFERENCES OGLOSZENIA (OGLOSZENIE_ID),
@@ -334,10 +304,8 @@ CREATE TABLE HISTORIA_CEN_OGLOSZEN (
     DATA_ZMIANY TIMESTAMP DEFAULT SYSTIMESTAMP
 );
 
--- ============================================================
 -- Statystyki rynkowe (zagregowane per miasto, dzielnica, typ)
 -- Aktualizowane przez SP_OBLICZ_STATYSTYKI_RYNKOWE
--- ============================================================
 CREATE TABLE STATYSTYKI_RYNKOWE (
     STATYSTYKI_ID NUMBER DEFAULT SEQ_STATYSTYKI.NEXTVAL PRIMARY KEY,
     MIESIAC NUMBER (2) NOT NULL CHECK (
@@ -370,9 +338,7 @@ CREATE TABLE STATYSTYKI_RYNKOWE (
     )
 );
 
--- ============================================================
 -- Indeksy
--- ============================================================
 CREATE INDEX IDX_USERS_ROLA ON USERS (ROLA_ID);
 
 CREATE INDEX IDX_DZIALKI_GMINA ON DZIALKI (GMINA, WOJEWODZTWO);

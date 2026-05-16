@@ -1,14 +1,10 @@
--- ============================================================
 -- Widoki analityczne i procedury
 -- Uruchamiac po 02_insert_test_data.sql
--- ============================================================
 
 SET SQLBLANKLINES ON
 
--- ============================================================
 -- Widok: Aktywne ogloszenia z pelnym opisem nieruchomosci
 -- (bez duplikatow – glowny widok dla obywateli i agentow)
--- ============================================================
 CREATE OR REPLACE VIEW V_OGLOSZENIA_AKTYWNE AS
 SELECT
     o.OGLOSZENIE_ID,
@@ -65,10 +61,8 @@ WHERE
     o.STATUS = 'AKTYWNE'
     AND o.JEST_DUPLIKATEM = 0;
 
--- ============================================================
 -- Widok: Pelna historia wlasnosci z danymi nieruchomosci
 -- Dostepna dla urzednikow, bankow i admina
--- ============================================================
 CREATE OR REPLACE VIEW V_HISTORIA_WLASNOSCI_PELNA AS
 SELECT
     hw.HISTORIA_ID,
@@ -105,9 +99,7 @@ FROM
 ORDER BY
     hw.DATA_OD DESC;
 
--- ============================================================
 -- Widok: Aktywne hipoteki i obciazenia (dla bankow i urzednikow)
--- ============================================================
 CREATE OR REPLACE VIEW V_HIPOTEKI_AKTYWNE AS
 SELECT
     h.HIPOTEKA_ID,
@@ -149,9 +141,7 @@ WHERE
 ORDER BY
     h.DATA_WPISU DESC;
 
--- ============================================================
 -- Widok: Statystyki rynkowe (dla analitykow, bez danych osobowych)
--- ============================================================
 CREATE OR REPLACE VIEW V_STATYSTYKI_RYNKOWE_SUMMARY AS
 SELECT
     sr.ROK,
@@ -173,10 +163,8 @@ ORDER BY
     sr.MIASTO,
     sr.DZIELNICA;
 
--- ============================================================
 -- Widok: Wykryte duplikaty ogloszen
 -- (do analizy i czyszczenia przez admina)
--- ============================================================
 CREATE OR REPLACE VIEW V_DUPLIKATY_OGLOSZEN AS
 SELECT
     o.OGLOSZENIE_ID,
@@ -198,9 +186,7 @@ WHERE
 ORDER BY
     o.HASH_DEDUPLIKACJI;
 
--- ============================================================
 -- Widok: Portfel agenta / dewelopera (aktywne ogloszenia)
--- ============================================================
 CREATE OR REPLACE VIEW V_PORTFEL_AGENTA AS
 SELECT
     u.USER_ID AS AGENT_ID,
@@ -237,11 +223,9 @@ GROUP BY
     u.NAZWISKO,
     ru.NAZWA;
 
--- ============================================================
 -- Procedura: Szacuj wartosc rynkowa lokalu
 -- Algorytm: mediana cena/m2 z transakcji w tym samym miescie
 -- (ostatnie 12 miesiecy) razy metraz lokalu
--- ============================================================
 CREATE OR REPLACE PROCEDURE SP_SZACUJ_WARTOSC_LOKALU (p_lokal_id IN NUMBER) AS
     v_metraz    NUMBER;
 
@@ -288,14 +272,12 @@ BEGIN
 END SP_SZACUJ_WARTOSC_LOKALU;
 /
 
--- ============================================================
 -- Procedura: Deduplikuj ogloszenia
 -- Algorytm:
 --   1. Oblicz HASH_DEDUPLIKACJI dla ogloszen bez hasha
 --      (na podstawie identyfikatora nieruchomosci + typ_ogloszenia)
 --   2. W grupach ogloszen z tym samym hashem,
 --      oznacz wszystkie oprocz najstarszego jako duplikat
--- ============================================================
 CREATE OR REPLACE PROCEDURE SP_DEDUPLIKUJ_OGLOSZENIA AS
     v_hash VARCHAR2 (64);
 
@@ -353,11 +335,9 @@ BEGIN
 END SP_DEDUPLIKUJ_OGLOSZENIA;
 /
 
--- ============================================================
 -- Procedura: Oblicz statystyki rynkowe dla miasta i okresu
 -- Algorytm: agregacja transakcji lokal w danym miesiacu/roku/miescie
 -- UPSERT do STATYSTYKI_RYNKOWE per typ lokalu
--- ============================================================
 CREATE OR REPLACE PROCEDURE SP_OBLICZ_STATYSTYKI_RYNKOWE (
     p_miasto IN VARCHAR2,
     p_rok IN NUMBER,
@@ -442,9 +422,7 @@ BEGIN
 END SP_OBLICZ_STATYSTYKI_RYNKOWE;
 /
 
--- ============================================================
 -- Role i uprawnienia (uruchamiac jako DBA/ADMIN)
--- ============================================================
 -- CREATE ROLE OBDN_ADMIN;
 -- CREATE ROLE OBDN_AGENT;
 -- CREATE ROLE OBDN_OBYWATEL;
@@ -470,9 +448,7 @@ END SP_OBLICZ_STATYSTYKI_RYNKOWE;
 -- GRANT EXECUTE ON SP_OBLICZ_STATYSTYKI_RYNKOWE                TO OBDN_ADMIN;
 -- GRANT EXECUTE ON SP_SZACUJ_WARTOSC_LOKALU                    TO OBDN_BANK;
 
--- ============================================================
 -- Test: uruchom procedury i sprawdz wyniki
--- ============================================================
 -- BEGIN SP_DEDUPLIKUJ_OGLOSZENIA; END;
 -- /
 -- BEGIN SP_SZACUJ_WARTOSC_LOKALU(1); END;

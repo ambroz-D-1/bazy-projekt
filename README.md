@@ -177,9 +177,7 @@ erDiagram
 
 ## OBDN — Ogólnopolska Baza Danych Nieruchomości
 
-Centralny rejestr nieruchomości integrujący dane z państwowych rejestrów (EGIB, EKW, TERYT, CEEB) oraz portali ogłoszeniowych (Otodom, OLX, Gratka, Morizon). Obsługuje trzypoziomową hierarchię nieruchomości, historię własności, hipoteki, transakcje, deduplikację ogłoszeń i statystyki rynkowe.
-
-Obsługiwane role: Admin, Obywatel, Agent/Biuro, Deweloper, Urzędnik, Bank, Analityk.
+Rejestr nieruchomości spinający w jedno dane z EGIB, EKW, TERYT i CEEB oraz ogłoszenia z zewnętrznych portali (Otodom, OLX, Gratka, Morizon). Trzypoziomowa hierarchia: działka → budynek → lokal. Role: Admin, Obywatel, Agent, Deweloper, Urzędnik, Bank, Analityk.
 
 ### Model ERD (OBDN)
 
@@ -328,22 +326,20 @@ erDiagram
 
 ### Widoki (OBDN)
 
-| Widok                          | Opis                                                            |
-| ------------------------------ | --------------------------------------------------------------- |
-| `V_OGLOSZENIA_AKTYWNE`         | Aktywne ogłoszenia z pełnymi danymi adresowymi                  |
-| `V_HISTORIA_WLASNOSCI_PELNA`   | Historia własności z danymi właściciela i adresem nieruchomości |
-| `V_HIPOTEKI_AKTYWNE`           | Aktywne hipoteki z danymi lokalu i ksiąg wieczystych            |
-| `V_STATYSTYKI_RYNKOWE_SUMMARY` | Podsumowanie statystyk rynkowych per miasto/typ/rok             |
-| `V_DUPLIKATY_OGLOSZEN`         | Ogłoszenia oznaczone jako duplikaty (JEST_DUPLIKATEM=1)         |
-| `V_PORTFEL_AGENTA`             | Aktywne ogłoszenia przypisane do agenta/biura                   |
+- `V_OGLOSZENIA_AKTYWNE` — aktywne oferty z adresem i danymi wystawiającego
+- `V_HISTORIA_WLASNOSCI_PELNA` — pełna historia właścicieli z adresem nieruchomości
+- `V_HIPOTEKI_AKTYWNE` — aktywne hipoteki
+- `V_STATYSTYKI_RYNKOWE_SUMMARY` — statystyki per miasto/typ/rok
+- `V_DUPLIKATY_OGLOSZEN` — ogłoszenia zdeduplikowane (to samo mieszkanie na kilku portalach)
+- `V_PORTFEL_AGENTA` — aktywne ogłoszenia agenta
 
 ### Procedury (OBDN)
 
-| Procedura | Opis |
-| --------- | ---- |
-| `SP_SZACUJ_WARTOSC_LOKALU(p_lokal_id)` | Szacuje wartość lokalu przez MEDIAN ceny/m² z transakcji z ostatnich 12 miesięcy w tym samym mieście; zapisuje do `LOKALE.SZACOWANA_WARTOSC` |
-| `SP_DEDUPLIKUJ_OGLOSZENIA` | Oblicza SHA-256 hash (lokal+typ ogłoszenia) dla wszystkich ogłoszeń, oznacza duplikaty (`JEST_DUPLIKATEM=1`, `DUPLIKAT_GLOWNEGO_ID`) |
-| `SP_OBLICZ_STATYSTYKI_RYNKOWE(p_miasto, p_rok, p_miesiac)` | MERGE do `STATYSTYKI_RYNKOWE`: COUNT, AVG, MEDIAN, MIN, MAX cen/m² z transakcji za dany miesiąc i miasto |
+`SP_SZACUJ_WARTOSC_LOKALU(p_lokal_id)` — liczy szacunkową wartość przez medianę ceny/m² z transakcji z ostatnich 12 miesięcy w tym samym mieście.
+
+`SP_DEDUPLIKUJ_OGLOSZENIA` — SHA-256 hash na podstawie id nieruchomości + typ ogłoszenia; oznacza duplikaty między portalami.
+
+`SP_OBLICZ_STATYSTYKI_RYNKOWE(p_miasto, p_rok, p_miesiac)` — MERGE do tabeli statystyk (COUNT, AVG, MEDIAN, MIN, MAX ceny/m²).
 
 ---
 
@@ -491,12 +487,12 @@ GitHub Actions uruchamia oba suite równolegle przy każdym push do `pegasus/sql
 
 ## Podział pracy
 
-| Osoba | Zakres                                                                                          |
-| ----- | ----------------------------------------------------------------------------------------------- |
-| **1** | Analiza biznesowa, opis procesów, wymagania, diagramy UML przypadków użycia (PEGASUS + OBDN)    |
-| **2** | Modele ERD, decyzje projektowe, słowniki (PEGASUS + OBDN)                                       |
-| **3** | Algorytmy, diagramy UML czynności i stanów, widoki SQL (PEGASUS + OBDN)                         |
-| **4** | Wdrożenie Oracle Cloud/Docker, skrypty DDL/DML, procedury, CI/CD, demo na zajęciach             |
+| Osoba | Zakres                                                         |
+| ----- | -------------------------------------------------------------- |
+| **1** | Analiza biznesowa, diagramy przypadków użycia, opis założeń    |
+| **2** | Model ERD, słowniki, decyzje projektowe                        |
+| **3** | Diagramy czynności i stanów, widoki SQL                        |
+| **4** | DDL/DML, procedury, Docker, CI, demo                           |
 
 ---
 
