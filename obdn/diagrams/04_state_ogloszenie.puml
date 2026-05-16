@@ -1,0 +1,41 @@
+@startuml
+title Diagram stanu – Cykl zycia ogloszenia
+
+[*] --> Robocze : Agent tworzy ogloszenie
+
+Robocze --> Aktywne : Agent publikuje\n(UPDATE STATUS)
+Robocze --> Wycofane : Agent usuwa szkic
+
+Aktywne --> Zarezerwowane : Kupujacy/najemca\nzlozyl rezerwacje
+Aktywne --> Wycofane    : Agent wycofuje oferte
+Aktywne --> Aktywne     : Zmiana ceny\n(INSERT HISTORIA_CEN_OGLOSZEN)
+
+Zarezerwowane --> Aktywne    : Rezerwacja anulowana
+Zarezerwowane --> Sprzedane  : Transakcja finalizowana\n(typ = SPRZEDAZ)
+Zarezerwowane --> Wynajete   : Umowa najmu podpisana\n(typ = WYNAJEM)
+Zarezerwowane --> Wycofane   : Agent wycofuje
+
+Sprzedane  --> [*]
+Wynajete   --> Aktywne : Koniec umowy najmu\n(nowy najem mozliwy)
+Wynajete   --> [*]
+Wycofane   --> [*]
+
+note right of Aktywne
+  STATUS = 'AKTYWNE'
+  JEST_DUPLIKATEM moze = 1
+  (widoczne w V_DUPLIKATY_OGLOSZEN)
+end note
+
+note right of Zarezerwowane
+  STATUS = 'ZAREZERWOWANE'
+  Widoczne dla banku
+  przy weryfikacji
+end note
+
+note right of Sprzedane
+  STATUS = 'SPRZEDANE'
+  Urzednik rejestruje
+  transakcje w TRANSAKCJE
+  Aktualizuje HISTORIA_WLASNOSCI
+end note
+@enduml

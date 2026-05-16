@@ -1,0 +1,57 @@
+@startuml
+title Diagram czynnosci – Wyszukiwanie nieruchomosci przez Obywatela
+
+|Obywatel|
+|System OBDN|
+
+|Obywatel|
+start
+:Otwiera strone wyszukiwania;
+:Podaje kryteria:\nmiejscowosc lub promien od punktu,\nprzedzial cenowy,\nliczba pokoi,\ntyp nieruchomosci;
+
+|System OBDN|
+:Waliduje kryteria;
+
+if (Kryteria poprawne?) then (tak)
+  fork
+    :Wyszukaj w OGLOSZENIA\nwedlug kryteriow;
+  fork again
+    :Pobierz wspolrzedne GPS\nz DZIALKI / BUDYNKI;
+  end fork
+
+  :Filtruj wyniki:\nwykluczaja duplikaty\n(JEST_DUPLIKATEM = 0);
+  :Sortuj wyniki\n(domyslnie: cena ASC);
+  :Zwroc liste ogloszen;
+  :Wyswietl wyniki na liscie\noraz na mapie interaktywnej;
+else (nie)
+  :Wyswietl komunikat o bledzie;
+  stop
+endif
+
+|Obywatel|
+:Przegladaj wyniki;
+
+if (Kliknieto nieruchomosc?) then (tak)
+  |System OBDN|
+  fork
+    :Pobierz szczegoly ogłoszenia;
+  fork again
+    :Pobierz aktualnego wlasciciela\nz HISTORIA_WLASNOSCI (AKTYWNA=1);
+  fork again
+    :Pobierz aktywne hipoteki\nz HIPOTEKI (AKTYWNA=1);
+  fork again
+    :Pobierz transakcje historyczne;
+  fork again
+    :Pobierz szacunkowa wartosc\nz LOKALE.SZACOWANA_WARTOSC;
+  end fork
+
+  :Wyswietl pelna karte nieruchomosci\n(dane + historia + wycena);
+
+  |Obywatel|
+  :Zapoznaje sie z historia\ni stanem prawnym;
+  :Opcjonalnie kontaktuje\nsie z wlascicielem / agentem;
+else (nie)
+  :Koniec przegladania;
+endif
+stop
+@enduml
