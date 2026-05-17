@@ -12,41 +12,66 @@ actor "System analizy" as S
 rectangle "System Analizy Behawioralnej Platformy Spolecznosciowej" {
 
   package "Dostep uzytkownika" {
-    usecase "Wyswietl wlasne polubienia"  as UC1
-    usecase "Wyswietl wlasne komentarze" as UC2
+    usecase "Przegladaj feed postow"             as UC1
+    usecase "Polub / skomentuj / udostepnij post" as UC2
+    usecase "Rejestruj czas na poscie"           as UC3
+    usecase "Wyswietl wlasne polubienia"         as UC4
+    usecase "Wyswietl wlasne komentarze"         as UC5
+    usecase "Wyswietl wlasne udostepnienia"      as UC6
+    usecase "Dodaj nowy post"                    as UC7
   }
 
   package "Zarzadzanie przez admina" {
-    usecase "Zarzadzaj uzytkownikami (CRUD)" as UC3
-    usecase "Zarzadzaj postami (CRUD)"       as UC4
-    usecase "Przegladaj interakcje"          as UC5
-    usecase "Przegladaj profile behawioralne" as UC6
-    usecase "Filtruj tresci szczegolnej uwagi" as UC7
-    usecase "Generuj raport uzytkownika"     as UC8
+    usecase "Zarzadzaj uzytkownikami (CRUD)"         as UC8
+    usecase "Zarzadzaj postami (CRUD)"               as UC9
+    usecase "Przegladaj interakcje"                  as UC10
+    usecase "Przegladaj profile behawioralne"         as UC11
+    usecase "Filtruj uzytkownikow wg profilu"         as UC12
+    usecase "Oznacz post jako szczegolnej uwagi"      as UC13
+    usecase "Przegladaj raport ostrzezen"             as UC14
+    usecase "Generuj raport uzytkownika"              as UC15
+    usecase "Przegladaj ranking postow"               as UC16
   }
 
   package "Analiza automatyczna" {
-    usecase "Oblicz profil behawioralny"     as UC9
-    usecase "Wykryj tresci ekstremistyczne"  as UC10
-    usecase "Buduj klastry uzytkownikow"     as UC11
+    usecase "Oblicz profil behawioralny"         as UC17
+    usecase "Wykryj tresci ekstremistyczne"      as UC18
+    usecase "Buduj klastry uzytkownikow"         as UC19
+    usecase "Buduj digital fingerprint"          as UC20
+    usecase "Generuj ranking postow wg zaangazowania" as UC21
   }
 }
 
 U --> UC1
 U --> UC2
+U --> UC3
+U --> UC4
+U --> UC5
+U --> UC6
+U --> UC7
 
-A --> UC3
-A --> UC4
-A --> UC5
-A --> UC6
-A --> UC7
 A --> UC8
+A --> UC9
+A --> UC10
+A --> UC11
+A --> UC12
+A --> UC13
+A --> UC14
+A --> UC15
+A --> UC16
 
-S --> UC9
-S --> UC10
-S --> UC11
+S --> UC17
+S --> UC18
+S --> UC19
+S --> UC20
+S --> UC21
 
-UC6 ..> UC9  : <<include>>
-UC7 ..> UC10 : <<include>>
-UC8 ..> UC9  : <<include>>
+UC2  ..> UC17 : <<include>>
+UC2  ..> UC3  : <<include>>
+UC11 ..> UC17 : <<include>>
+UC13 ..> UC18 : <<include>>
+UC15 ..> UC17 : <<include>>
+UC12 ..> UC11 : <<include>>
+UC14 ..> UC13 : <<extend>>
+UC16 ..> UC21 : <<include>>
 @enduml

@@ -149,7 +149,6 @@ ORDER BY COALESCE(
 
 -- ============================================================
 -- Widok: Profil behawioralny – pelny (dla admina)
--- UML: Admin.dostepDoWszystkiego() – wszystkie pola ProfilAnalitycznego
 -- ============================================================
 CREATE OR REPLACE VIEW V_USER_FULL_PROFILE AS
 SELECT
@@ -179,7 +178,6 @@ FROM
 
 -- ============================================================
 -- Widok: Interakcje uzytkownika (dla samego uzytkownika)
--- UML: UzytkownikWidok.widziPolubionePosty() + widziSwojeKomentarze()
 -- ============================================================
 CREATE OR REPLACE VIEW V_MY_INTERACTIONS AS
 SELECT
@@ -460,7 +458,6 @@ END SP_BUILD_SOCIAL_CLUSTERS;
 
 -- ============================================================
 -- Role i uprawnienia (uruchamiac jako DBA/ADMIN)
--- UML: Rola <|-- Admin (dostepDoWszystkiego), Rola <|-- UzytkownikWidok
 -- ============================================================
 -- CREATE ROLE PLATFORM_ADMIN;
 -- CREATE ROLE PLATFORM_USER;

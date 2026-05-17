@@ -20,36 +20,37 @@ U9[Przeglądaj raporty ostrzeżeń]
 end
 
 subgraph UserCases
-U10[Logowanie]
-U11[Przeglądaj feed]
-U12[Polub post]
-U13[Skomentuj post]
-U14[Udostępnij post]
-U15[Przeglądaj polubione]
-U16[Przeglądaj komentarze]
-U17[Przeglądaj udostępnienia]
-U18[Rejestruj czas na poście]
-U19[Aktualizuj profil analityczny]
+U10[Przeglądaj feed]
+U11[Polub / skomentuj / udostępnij post]
+U12[Rejestruj czas na poście]
+U13[Przeglądaj polubione]
+U14[Przeglądaj komentarze]
+U15[Przeglądaj udostępnienia]
+U16[Dodaj nowy post]
+end
+
+subgraph SystemCases
+U17[Oblicz profil behawioralny]
+U18[Wykrywaj treści ekstremalne]
+U19[Buduj klastry użytkowników]
 U20[Buduj digital fingerprint]
-U21[Wykrywaj treści ekstremalne]
-U22[Generuj grupy powiązań]
+U21[Generuj ranking postów]
 end
 
 %% Aktorzy do przypadków
 A1 --> U1 & U2 & U3 & U4 & U5 & U6 & U7 & U8 & U9
-A2 --> U10 & U11 & U12 & U13 & U14 & U15 & U16 & U17 & U18 & U19 & U20 & U21 & U22
+A2 --> U10 & U11 & U13 & U14 & U15 & U16
 
 %% Include
-U13 -.-> U10
-U14 -.-> U10
-U12 -.-> U10
-U12 -.-> U19
-U13 -.-> U19
-U14 -.-> U19
-U11 -.-> U18
+U11 -.-> U12
+U11 -.-> U17
+U5 -.-> U17
+U7 -.-> U18
+U9 -.-> U17
 
 %% Extend
-U11 -.-> U20
-U13 -.-> U21
-U13 -.-> U8
+U10 -.-> U20
+U11 -.-> U18
+U7 -.-> U8
+U4 -.-> U21
 ```

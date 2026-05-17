@@ -1,10 +1,11 @@
-﻿#Requires -Version 5.1
+#Requires -Version 5.1
 <#
 .SYNOPSIS
-    One-click deploy PEGASUS database (Oracle XE w Dockerze)
+    One-click deploy PEGASUS + OBDN (Oracle XE w Dockerze)
 .DESCRIPTION
-    Uruchamia Oracle XE, tworzy schemat PEGASUS i laduje wszystkie dane.
-    Przy ponownym uruchomieniu: resetuje schemat (DROP + CREATE).
+    Uruchamia Oracle XE i CloudBeaver, tworzy schematy PEGASUS i OBDN,
+    laduje wszystkie dane testowe i pokazowe.
+    Przy ponownym uruchomieniu: pomija DROP (chyba ze podano -Reset).
     Wymaga: Docker Desktop
 .EXAMPLE
     .\setup.ps1
@@ -44,13 +45,18 @@ function Invoke-OracleSQL {
     return $ec
 }
 
+function New-RandomPassword { param($suffix)
+    $pool = 'abcdefghjkmnpqrstuvwxyzABCDEFGHJKMNPQRSTUVWXYZ23456789'
+    return (-join (1..16 | ForEach-Object { $pool[(Get-Random -Maximum $pool.Length)] })) + $suffix
+}
+
 Write-Host ""
-Write-Host "#==========================================╗" -ForegroundColor Cyan
-Write-Host "#   PEGASUS  –   Database Setup            #" -ForegroundColor Cyan
-Write-Host "#==========================================#" -ForegroundColor Cyan
+Write-Host "#===========================================#" -ForegroundColor Cyan
+Write-Host "#   PEGASUS + OBDN  –  Database Setup      #" -ForegroundColor Cyan
+Write-Host "#===========================================#" -ForegroundColor Cyan
 
 # ---------------------------------------------
-Write-Step "1/6" "Sprawdzam Docker"
+Write-Step "1/8" "Sprawdzam Docker"
 # ---------------------------------------------
 if (-not (Get-Command docker -ErrorAction SilentlyContinue)) {
     Write-Fail "Docker nie jest zainstalowany. Pobierz: https://www.docker.com/products/docker-desktop/"
@@ -60,13 +66,13 @@ catch { Write-Fail "Docker Desktop nie jest uruchomiony. Uruchom go i sprobuj po
 Write-OK "Docker uruchomiony"
 
 # ---------------------------------------------
-Write-Step "2/6" "Konfiguracja .env"
+Write-Step "2/8" "Konfiguracja .env"
 # ---------------------------------------------
 if (-not (Test-Path $ENV_FILE)) {
-    $pool = 'abcdefghjkmnpqrstuvwxyzABCDEFGHJKMNPQRSTUVWXYZ23456789'
-    $oraclePwd  = (-join (1..16 | ForEach-Object { $pool[(Get-Random -Maximum $pool.Length)] })) + "1Aa"
-    $pegasusPwd = (-join (1..16 | ForEach-Object { $pool[(Get-Random -Maximum $pool.Length)] })) + "2Bb"
-    "ORACLE_PASSWORD=$oraclePwd`nPEGASUS_PASSWORD=$pegasusPwd`n" |
+    $oraclePwd  = New-RandomPassword "1Aa"
+    $pegasusPwd = New-RandomPassword "2Bb"
+    $obdnPwd    = New-RandomPassword "3Cc"
+    "ORACLE_PASSWORD=$oraclePwd`nPEGASUS_PASSWORD=$pegasusPwd`nOBDN_PASSWORD=$obdnPwd`n" |
         Out-File $ENV_FILE -Encoding utf8 -NoNewline
     Write-OK "Plik .env wygenerowany z losowymi haslami"
 } else {
@@ -76,11 +82,19 @@ if (-not (Test-Path $ENV_FILE)) {
 $envRaw     = [System.IO.File]::ReadAllText($ENV_FILE)
 $oraclePwd  = ($envRaw -split "`n" | Where-Object { $_ -match "^ORACLE_PASSWORD="  }) -replace "^ORACLE_PASSWORD=",""  | ForEach-Object { $_.Trim() } | Select-Object -First 1
 $pegasusPwd = ($envRaw -split "`n" | Where-Object { $_ -match "^PEGASUS_PASSWORD=" }) -replace "^PEGASUS_PASSWORD=","" | ForEach-Object { $_.Trim() } | Select-Object -First 1
+$obdnPwd    = ($envRaw -split "`n" | Where-Object { $_ -match "^OBDN_PASSWORD="    }) -replace "^OBDN_PASSWORD=",""    | ForEach-Object { $_.Trim() } | Select-Object -First 1
 
 if (-not $oraclePwd -or -not $pegasusPwd) { Write-Fail "Nie udalo sie odczytac hasel z .env" }
 
+# Jesli stary .env nie mial OBDN_PASSWORD – dodaj je
+if (-not $obdnPwd) {
+    $obdnPwd = New-RandomPassword "3Cc"
+    Add-Content $ENV_FILE "`nOBDN_PASSWORD=$obdnPwd"
+    Write-Info "Dodano OBDN_PASSWORD do istniejacego .env"
+}
+
 # ---------------------------------------------
-Write-Step "3/6" "Uruchamiam Oracle XE (Docker)"
+Write-Step "3/8" "Uruchamiam Oracle XE + CloudBeaver (Docker)"
 # ---------------------------------------------
 Push-Location $ROOT
 $prevEAP = $ErrorActionPreference; $ErrorActionPreference = "Continue"
@@ -89,10 +103,10 @@ $ErrorActionPreference = $prevEAP
 $running = docker ps --filter "name=$CONTAINER" --format "{{.Status}}" 2>&1
 if (-not $running) { Write-Fail "docker compose up nieudany - kontener nie dziala" }
 Pop-Location
-Write-OK "Kontener $CONTAINER uruchomiony"
+Write-OK "Kontenery uruchomione"
 
 # ---------------------------------------------
-Write-Step "4/6" "Czekam na gotowos Oracle XE (max 5 min)"
+Write-Step "4/8" "Czekam na gotowos Oracle XE (max 5 min)"
 # ---------------------------------------------
 $deadline = (Get-Date).AddMinutes(5)
 $ready = $false
@@ -108,100 +122,111 @@ if (-not $ready) {
 }
 Write-OK "Oracle XE GOTOWY"
 
-# ---------------------------------------------
-Write-Step "5/6" "Tworze schemat PEGASUS"
-# ---------------------------------------------
-$sysConn = "sys/${oraclePwd}@localhost:1521/${ORACLE_SVC}"
+# ─── pomocnicza funkcja tworzenia schematu ────────────────────────────────────
+function New-OracleSchema {
+    param([string]$SchemaName, [string]$Password)
 
-$resetClause = if ($Reset) {
-    "EXECUTE IMMEDIATE 'DROP USER PEGASUS CASCADE'; DBMS_OUTPUT.PUT_LINE('Stary schemat PEGASUS usunieto.');"
-} else {
-    "DBMS_OUTPUT.PUT_LINE('Schemat PEGASUS juz istnieje -- pomijam DROP (brak -Reset).');"
-}
+    $resetClause = if ($Reset) {
+        "EXECUTE IMMEDIATE 'DROP USER $SchemaName CASCADE'; DBMS_OUTPUT.PUT_LINE('Stary schemat $SchemaName usunieto.');"
+    } else {
+        "DBMS_OUTPUT.PUT_LINE('Schemat $SchemaName juz istnieje -- pomijam DROP (brak -Reset).');"
+    }
 
-$createUser = @"
+    $sql = @"
 SET SERVEROUTPUT ON
 DECLARE
     v_exists NUMBER;
 BEGIN
-    SELECT COUNT(*) INTO v_exists FROM dba_users WHERE username = 'PEGASUS';
+    SELECT COUNT(*) INTO v_exists FROM dba_users WHERE username = '$SchemaName';
     IF v_exists > 0 THEN
         $resetClause
     END IF;
+    SELECT COUNT(*) INTO v_exists FROM dba_users WHERE username = '$SchemaName';
+    IF v_exists = 0 THEN
+        EXECUTE IMMEDIATE 'CREATE USER $SchemaName IDENTIFIED BY "$Password"';
+        EXECUTE IMMEDIATE 'GRANT CONNECT, RESOURCE, UNLIMITED TABLESPACE TO $SchemaName';
+        EXECUTE IMMEDIATE 'GRANT CREATE VIEW, CREATE PROCEDURE, CREATE SEQUENCE, CREATE TABLE, CREATE SESSION TO $SchemaName';
+        DBMS_OUTPUT.PUT_LINE('Uzytkownik $SchemaName utworzony.');
+    ELSE
+        DBMS_OUTPUT.PUT_LINE('Uzytkownik $SchemaName juz istnieje -- pomijam CREATE USER.');
+    END IF;
 END;
 /
-CREATE USER PEGASUS IDENTIFIED BY "$pegasusPwd";
-GRANT CONNECT, RESOURCE, UNLIMITED TABLESPACE TO PEGASUS;
-GRANT CREATE VIEW, CREATE PROCEDURE, CREATE SEQUENCE, CREATE TABLE, CREATE SESSION TO PEGASUS;
-PROMPT Uzytkownik PEGASUS gotowy.
+PROMPT $SchemaName gotowy.
 EXIT;
 "@
-
-$ec = Invoke-OracleSQL "sys/${oraclePwd}@localhost:1521/${ORACLE_SVC} as sysdba" $createUser
-if ($ec -ne 0) { Write-Fail "Tworzenie uzytkownika PEGASUS nieudane (exit $ec)" }
-Write-OK "Uzytkownik PEGASUS utworzony"
-
-# ---------------------------------------------
-Write-Step "6/6" "Laduje skrypty SQL"
-# ---------------------------------------------
-$scripts = if ($SkipData) {
-    "@/sql/01_create_tables.sql"
-} else {
-    "@/sql/01_create_tables.sql`n@/sql/02_insert_test_data.sql`n@/sql/03_views_and_procedures.sql`n@/sql/04_demo_data.sql"
+    $ec = Invoke-OracleSQL "sys/${oraclePwd}@localhost:1521/${ORACLE_SVC} as sysdba" $sql
+    if ($ec -ne 0) { Write-Fail "Tworzenie uzytkownika $SchemaName nieudane (exit $ec)" }
 }
 
-$masterSql = @"
+# ─── pomocnicza funkcja ladowania skryptow SQL ────────────────────────────────
+function Invoke-SqlScripts {
+    param([string]$SchemaName, [string]$Password, [string]$SqlDir)
+
+    $scripts = if ($SkipData) {
+        "@${SqlDir}/01_create_tables.sql"
+    } else {
+        "@${SqlDir}/01_create_tables.sql`n@${SqlDir}/02_insert_test_data.sql`n@${SqlDir}/03_views_and_procedures.sql`n@${SqlDir}/04_demo_data.sql"
+    }
+
+    $masterSql = @"
 SET SQLBLANKLINES ON
 $scripts
 EXIT;
 "@
-
-$tmp = [System.IO.Path]::GetTempFileName() + ".sql"
-$utf8NoBom = New-Object System.Text.UTF8Encoding $false
-[System.IO.File]::WriteAllText($tmp, $masterSql, $utf8NoBom)
-docker cp $tmp "${CONTAINER}:/tmp/_master.sql" | Out-Null
-docker exec -u oracle $CONTAINER sqlplus "PEGASUS/${pegasusPwd}@localhost:1521/${ORACLE_SVC}" "@/tmp/_master.sql"
-$ec = $LASTEXITCODE
-Remove-Item $tmp -ErrorAction SilentlyContinue
-if ($ec -ne 0) { Write-Fail "Uruchamianie skryptow SQL nieudane (exit $ec)" }
-Write-OK "Skrypty SQL zaladowane"
+    $tmp = [System.IO.Path]::GetTempFileName() + ".sql"
+    $utf8NoBom = New-Object System.Text.UTF8Encoding $false
+    [System.IO.File]::WriteAllText($tmp, $masterSql, $utf8NoBom)
+    docker cp $tmp "${CONTAINER}:/tmp/_master.sql" | Out-Null
+    docker exec -u oracle $CONTAINER sqlplus "${SchemaName}/${Password}@localhost:1521/${ORACLE_SVC}" "@/tmp/_master.sql"
+    $ec = $LASTEXITCODE
+    Remove-Item $tmp -ErrorAction SilentlyContinue
+    if ($ec -ne 0) { Write-Fail "Uruchamianie skryptow SQL dla $SchemaName nieudane (exit $ec)" }
+}
 
 # ---------------------------------------------
-# Weryfikacja
+Write-Step "5/8" "Tworze schemat PEGASUS"
+# ---------------------------------------------
+New-OracleSchema "PEGASUS" $pegasusPwd
+Write-OK "Uzytkownik PEGASUS gotowy"
+
+# ---------------------------------------------
+Write-Step "6/8" "Laduje skrypty SQL – PEGASUS"
+# ---------------------------------------------
+Invoke-SqlScripts "PEGASUS" $pegasusPwd "/sql"
+Write-OK "Skrypty PEGASUS zaladowane"
+
+# ---------------------------------------------
+Write-Step "7/8" "Tworze schemat OBDN"
+# ---------------------------------------------
+New-OracleSchema "OBDN" $obdnPwd
+Write-OK "Uzytkownik OBDN gotowy"
+
+# ---------------------------------------------
+Write-Step "8/8" "Laduje skrypty SQL – OBDN"
+# ---------------------------------------------
+Invoke-SqlScripts "OBDN" $obdnPwd "/sql_obdn"
+Write-OK "Skrypty OBDN zaladowane"
+
+# ---------------------------------------------
+# Weryfikacja obu schematow
 # ---------------------------------------------
 $verifySql = @"
-ALTER SESSION SET CONTAINER = ${ORACLE_SVC};
-SET LINESIZE 60
+SET LINESIZE 80
+COLUMN owner       FORMAT A10
 COLUMN object_type FORMAT A25
 COLUMN cnt         FORMAT 9999
-COLUMN object_name FORMAT A35
-COLUMN status      FORMAT A10
-SELECT object_type, COUNT(*) cnt
-  FROM dba_objects WHERE owner='PEGASUS'
- GROUP BY object_type ORDER BY 1;
-SELECT object_name, status
-  FROM dba_objects WHERE owner='PEGASUS' AND object_type='PROCEDURE';
+SELECT owner, object_type, COUNT(*) cnt
+  FROM dba_objects
+ WHERE owner IN ('PEGASUS','OBDN')
+ GROUP BY owner, object_type
+ ORDER BY 1, 2;
 EXIT;
 "@
 Write-Host ""
-Write-Host "  +- Stan schematu PEGASUS " + ("-" * 18) + "+" -ForegroundColor Cyan
+Write-Host "  +-- Stan schematow " + ("-" * 30) + "+" -ForegroundColor Cyan
 $ec = Invoke-OracleSQL "/ as sysdba" $verifySql
 Write-Host ""
-
-$errSql = @"
-ALTER SESSION SET CONTAINER = ${ORACLE_SVC};
-SELECT COUNT(*) FROM dba_objects WHERE owner='PEGASUS' AND object_type='PROCEDURE' AND status='INVALID';
-EXIT;
-"@
-$tmp2 = [System.IO.Path]::GetTempFileName() + ".sql"
-[System.IO.File]::WriteAllText($tmp2, $errSql, [System.Text.Encoding]::UTF8)
-docker cp $tmp2 "${CONTAINER}:/tmp/_check.sql" | Out-Null
-$invalids = docker exec -u oracle $CONTAINER sqlplus -S "/ as sysdba" "@/tmp/_check.sql" 2>&1 |
-    Where-Object { $_ -match "^\s*\d+\s*$" } | ForEach-Object { $_.Trim() } | Select-Object -First 1
-Remove-Item $tmp2 -ErrorAction SilentlyContinue
-if ($invalids -and [int]$invalids -gt 0) {
-    Write-Host "  UWAGA: $invalids procedur(y) ma status INVALID – sprawdz logi powyzej." -ForegroundColor Yellow
-}
 
 # ---------------------------------------------
 # Podsumowanie
@@ -209,16 +234,23 @@ if ($invalids -and [int]$invalids -gt 0) {
 $port = (Get-Content $COMPOSE | Select-String '"\d+:1521"').ToString() -replace '.*"(\d+):1521".*','$1'
 
 Write-Host ""
-Write-Host "#==========================================╗" -ForegroundColor Green
-Write-Host "#            GOTOWE!                       #" -ForegroundColor Green
-Write-Host "#==========================================#" -ForegroundColor Green
+Write-Host "#===========================================#" -ForegroundColor Green
+Write-Host "#            GOTOWE!                        #" -ForegroundColor Green
+Write-Host "#===========================================#" -ForegroundColor Green
 Write-Host ""
-Write-Host "  Dane polaczenia (SQL Developer / DBeaver):" -ForegroundColor White
+Write-Host "  CloudBeaver (przegladarka):" -ForegroundColor Yellow
+Write-Host "    http://localhost:8978" -ForegroundColor Yellow
+Write-Host ""
+Write-Host "  Dane polaczenia – OBDN:" -ForegroundColor White
 Write-Host "    Host:         localhost"         -ForegroundColor White
 Write-Host "    Port:         $port"             -ForegroundColor White
 Write-Host "    Service name: $ORACLE_SVC"       -ForegroundColor White
+Write-Host "    Uzytkownik:   OBDN"              -ForegroundColor White
+Write-Host "    Haslo:        $obdnPwd"          -ForegroundColor White
+Write-Host ""
+Write-Host "  Dane polaczenia – PEGASUS:" -ForegroundColor White
 Write-Host "    Uzytkownik:   PEGASUS"            -ForegroundColor White
-Write-Host "    Haslo:        (patrz plik .env)" -ForegroundColor White
+Write-Host "    Haslo:        $pegasusPwd"        -ForegroundColor White
 Write-Host ""
 Write-Host "  Zatrzymanie:  docker compose down"         -ForegroundColor DarkGray
-Write-Host "  Pelny reset:  docker compose down -v"      -ForegroundColor DarkGray
+Write-Host "  Pelny reset:  docker compose down -v && .\setup.ps1 -Reset" -ForegroundColor DarkGray

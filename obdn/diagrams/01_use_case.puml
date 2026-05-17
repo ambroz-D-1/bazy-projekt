@@ -1,0 +1,114 @@
+@startuml
+title Diagram przypadkow uzycia – Ogolnopolska Baza Danych Nieruchomosci
+
+left to right direction
+skinparam actorStyle awesome
+skinparam packageStyle rectangle
+
+actor "Obywatel"            as OB
+actor "Agent / Biuro"       as AG
+actor "Deweloper"           as DE
+actor "Urzednik"            as UR
+actor "Bank"                as BA
+actor "Analityk"            as AN
+actor "System OBDN"         as SY
+
+rectangle "Ogolnopolska Baza Danych Nieruchomosci" {
+
+  package "Przegladanie i wyszukiwanie" {
+    usecase "Wyszukaj nieruchomosc\n(kryteria + mapa)"   as UC1
+    usecase "Przegladaj history wlasnosci"               as UC2
+    usecase "Sprawdz stan hipoteki"                      as UC3
+    usecase "Przegladaj aktualne ceny transakcji"        as UC4
+  }
+
+  package "Zarzadzanie ogloszeniami" {
+    usecase "Wystaw nowe ogloszenie"                     as UC5
+    usecase "Edytuj cene / opis ogloszenia"              as UC6
+    usecase "Oznacz lokal jako zarezerwowany"            as UC7
+    usecase "Wycofaj / zamknij ogloszenie"               as UC8
+    usecase "Przegladaj wlasny portfel ofert"            as UC9
+  }
+
+  package "Obsluga dewelopera" {
+    usecase "Dodaj projekt osiedla"                      as UC10
+    usecase "Dodaj lokale do projektu"                   as UC11
+    usecase "Przyjmij rezerwacje lokalu"                 as UC12
+  }
+
+  package "Zarzadzanie katastralne (Urzednik)" {
+    usecase "Aktualizuj dane dzialki / budynku"          as UC13
+    usecase "Wpisz hipoteke"                             as UC14
+    usecase "Wykresl hipoteke"                           as UC15
+    usecase "Zarejestruj transakcje"                     as UC16
+    usecase "Zarzadzaj ksiegami wieczystymi"             as UC17
+    usecase "Zarejestruj wspolwlasnosc\n(udzialy proc.)" as UC18
+  }
+
+  package "Obsluga bankowa" {
+    usecase "Sprawdz wartosc nieruchomosci"              as UC19
+    usecase "Sprawdz stan prawny i obciazenia"           as UC20
+    usecase "Wnioskuj o wycene systemowa"                as UC21
+  }
+
+  package "Analityka rynkowa" {
+    usecase "Przegladaj statystyki rynkowe"              as UC22
+    usecase "Eksportuj zagregowane dane"                 as UC23
+    usecase "Przegladaj trendy cenowe"                   as UC24
+  }
+
+  package "Automatyzacja systemu" {
+    usecase "Importuj ogloszenia z portali"              as UC25
+    usecase "Deduplikuj ogloszenia"                      as UC26
+    usecase "Oblicz statystyki rynkowe"                  as UC27
+    usecase "Szacuj wartosc lokali"                      as UC28
+  }
+
+  package "Zarzadzanie kontem" {
+    usecase "Usun konto\n(anonimizacja RODO)"           as UC29
+  }
+}
+
+OB --> UC1
+OB --> UC2
+OB --> UC3
+OB --> UC4
+OB --> UC29
+
+AG --> UC5
+AG --> UC6
+AG --> UC7
+AG --> UC8
+AG --> UC9
+
+DE --> UC10
+DE --> UC11
+DE --> UC12
+
+UR --> UC13
+UR --> UC14
+UR --> UC15
+UR --> UC16
+UR --> UC17
+UR --> UC18
+
+BA --> UC19
+BA --> UC20
+BA --> UC21
+
+AN --> UC22
+AN --> UC23
+AN --> UC24
+
+SY --> UC25
+SY --> UC26
+SY --> UC27
+SY --> UC28
+
+UC25 ..> UC26 : <<include>>
+UC16 ..> UC27 : <<include>>
+UC21 ..> UC28 : <<include>>
+UC6  ..> UC8  : <<extend>>
+UC12 ..> UC7  : <<extend>>
+UC18 ..> UC16 : <<extend>>
+@enduml

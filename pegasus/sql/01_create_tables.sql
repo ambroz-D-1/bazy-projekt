@@ -45,7 +45,6 @@ WITH
 
 -- ============================================================
 -- Role uzytkownikow (hierarchia: Admin, UzytkownikWidok)
--- UML: Rola <|-- Admin, Rola <|-- UzytkownikWidok
 -- ============================================================
 CREATE TABLE ROLES (
     ROLE_ID NUMBER DEFAULT SEQ_ROLES.NEXTVAL PRIMARY KEY,
@@ -126,7 +125,6 @@ CREATE TABLE POSTS (
 
 -- ============================================================
 -- Polubienia (Interakcja typ=LIKE)
--- UML: Polubienie extends Interakcja; czasSpedzonyNaPoscie -> TIME_SPENT_SEC
 -- ============================================================
 CREATE TABLE LIKES (
     LIKE_ID NUMBER DEFAULT SEQ_LIKES.NEXTVAL PRIMARY KEY,
@@ -139,7 +137,6 @@ CREATE TABLE LIKES (
 
 -- ============================================================
 -- Komentarze (Interakcja typ=COMMENT)
--- UML: Komentarz extends Interakcja; tresc -> CONTENT; czasSpedzonyNaPoscie -> TIME_SPENT_SEC
 -- ============================================================
 CREATE TABLE COMMENTS (
     COMMENT_ID NUMBER DEFAULT SEQ_COMMENTS.NEXTVAL PRIMARY KEY,
@@ -152,7 +149,6 @@ CREATE TABLE COMMENTS (
 
 -- ============================================================
 -- Udostepnienia (Interakcja typ=SHARE)
--- UML: Udostepnienie extends Interakcja; udostepniaKomu -> TO_USER_ID; czasSpedzonyNaPoscie -> TIME_SPENT_SEC
 -- ============================================================
 CREATE TABLE SHARES (
     SHARE_ID NUMBER DEFAULT SEQ_SHARES.NEXTVAL PRIMARY KEY,
@@ -176,15 +172,6 @@ CREATE TABLE POST_VIEWS (
 
 -- ============================================================
 -- Profile behawioralne uzytkownikow
--- UML: ProfilAnalityczny – pelne odwzorowanie wszystkich atrybutow
---   zainteresowania       -> PREFERRED_CATEGORY_ID + PREFERRED_TOPICS
---   preferowanaTematyka   -> PREFERRED_TOPICS
---   stopienZangazowania   -> ENGAGEMENT_SCORE (NUMBER) + ACTIVITY_PROFILE (etykieta)
---   profilPogladow        -> POLITICAL_LEAN + POLITICAL_SCORE
---   grupyPowiazan         -> SOCIAL_CLUSTER_ID
---   wplywTrescNaOpiniaWczasie -> OPINION_INFLUENCE_TIMELINE
---   profilAktywnosci      -> ACTIVITY_PROFILE
---   digitalFingerprint    -> DIGITAL_FINGERPRINT
 -- ============================================================
 CREATE TABLE USER_PROFILES (
     PROFILE_ID NUMBER DEFAULT SEQ_PROFILES.NEXTVAL PRIMARY KEY,
