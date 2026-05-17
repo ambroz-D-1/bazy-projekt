@@ -42,25 +42,30 @@ rectangle "Ogolnopolska Baza Danych Nieruchomosci" {
     usecase "Wykresl hipoteke"                           as UC15
     usecase "Zarejestruj transakcje"                     as UC16
     usecase "Zarzadzaj ksiegami wieczystymi"             as UC17
+    usecase "Zarejestruj wspolwlasnosc\n(udzialy proc.)" as UC18
   }
 
   package "Obsluga bankowa" {
-    usecase "Sprawdz wartosc nieruchomosci"              as UC18
-    usecase "Sprawdz stan prawny i obciazenia"           as UC19
-    usecase "Wnioskuj o wycene systemowa"                as UC20
+    usecase "Sprawdz wartosc nieruchomosci"              as UC19
+    usecase "Sprawdz stan prawny i obciazenia"           as UC20
+    usecase "Wnioskuj o wycene systemowa"                as UC21
   }
 
   package "Analityka rynkowa" {
-    usecase "Przegladaj statystyki rynkowe"              as UC21
-    usecase "Eksportuj zagregowane dane"                 as UC22
-    usecase "Przegladaj trendy cenowe"                   as UC23
+    usecase "Przegladaj statystyki rynkowe"              as UC22
+    usecase "Eksportuj zagregowane dane"                 as UC23
+    usecase "Przegladaj trendy cenowe"                   as UC24
   }
 
   package "Automatyzacja systemu" {
-    usecase "Importuj ogloszenia z portali"              as UC24
-    usecase "Deduplikuj ogloszenia"                      as UC25
-    usecase "Oblicz statystyki rynkowe"                  as UC26
-    usecase "Szacuj wartosc lokali"                      as UC27
+    usecase "Importuj ogloszenia z portali"              as UC25
+    usecase "Deduplikuj ogloszenia"                      as UC26
+    usecase "Oblicz statystyki rynkowe"                  as UC27
+    usecase "Szacuj wartosc lokali"                      as UC28
+  }
+
+  package "Zarzadzanie kontem" {
+    usecase "Usun konto\n(anonimizacja RODO)"           as UC29
   }
 }
 
@@ -68,6 +73,7 @@ OB --> UC1
 OB --> UC2
 OB --> UC3
 OB --> UC4
+OB --> UC29
 
 AG --> UC5
 AG --> UC6
@@ -84,23 +90,25 @@ UR --> UC14
 UR --> UC15
 UR --> UC16
 UR --> UC17
+UR --> UC18
 
-BA --> UC18
 BA --> UC19
 BA --> UC20
+BA --> UC21
 
-AN --> UC21
 AN --> UC22
 AN --> UC23
+AN --> UC24
 
-SY --> UC24
 SY --> UC25
 SY --> UC26
 SY --> UC27
+SY --> UC28
 
-UC24 ..> UC25 : <<include>>
-UC16 ..> UC26 : <<include>>
-UC20 ..> UC27 : <<include>>
+UC25 ..> UC26 : <<include>>
+UC16 ..> UC27 : <<include>>
+UC21 ..> UC28 : <<include>>
 UC6  ..> UC8  : <<extend>>
 UC12 ..> UC7  : <<extend>>
+UC18 ..> UC16 : <<extend>>
 @enduml

@@ -40,6 +40,7 @@ U16[Wpisz hipoteke]
 U17[Wykresl hipoteke]
 U18[Zarejestruj transakcje]
 U19[Zarzadzaj ksiegami wieczystymi]
+U31[Zarejestruj wspolwlasnosc]
 end
 
 subgraph BankCases
@@ -61,11 +62,15 @@ U28[Oblicz statystyki rynkowe]
 U29[Szacuj wartosc lokalu]
 end
 
+subgraph KontoCases
+U30[Usun konto / anonimizuj RODO]
+end
+
 %% Aktorzy do przypadkow
-A1 --> U1 & U2 & U3 & U4 & U5
+A1 --> U1 & U2 & U3 & U4 & U5 & U30
 A2 --> U6 & U7 & U8 & U9 & U10
 A3 --> U11 & U12 & U13 & U14
-A4 --> U15 & U16 & U17 & U18 & U19
+A4 --> U15 & U16 & U17 & U18 & U19 & U31
 A5 --> U20 & U21 & U22
 A6 --> U23 & U24 & U25
 
