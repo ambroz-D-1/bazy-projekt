@@ -1,6 +1,6 @@
 # PEGASUS + OBDN – Projekt bazy danych
 
-Dwa niezależne systemy baz danych zaimplementowane dla klienta (grupy F):
+Dwa niezależne systemy baz danych:
 
 - **PEGASUS** — System Analizy Behawioralnej Platformy Społecznościowej
 - **OBDN** — Ogólnopolska Baza Danych Nieruchomości
@@ -167,11 +167,11 @@ erDiagram
 
 ### Procedury (PEGASUS)
 
-| Procedura | Opis |
-| --------- | ---- |
+| Procedura                              | Opis                                                                                                                                                              |
+| -------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `SP_CALCULATE_USER_PROFILE(p_user_id)` | Przelicza i zapisuje do `USER_PROFILES`: engagement score, profil aktywności, preferred category, political lean, extremism exposure, digital fingerprint SHA-256 |
-| `SP_CALCULATE_ALL_PROFILES` | Wywołuje `SP_CALCULATE_USER_PROFILE` dla wszystkich aktywnych użytkowników |
-| `SP_BUILD_SOCIAL_CLUSTERS` | Grupuje użytkowników w klastry społeczne na podstawie wspólnych kategorii |
+| `SP_CALCULATE_ALL_PROFILES`            | Wywołuje `SP_CALCULATE_USER_PROFILE` dla wszystkich aktywnych użytkowników                                                                                        |
+| `SP_BUILD_SOCIAL_CLUSTERS`             | Grupuje użytkowników w klastry społeczne na podstawie wspólnych kategorii                                                                                         |
 
 ---
 
@@ -307,22 +307,22 @@ erDiagram
 
 ### Tabele (OBDN)
 
-| Tabela                  | Opis                                                                  |
-| ----------------------- | --------------------------------------------------------------------- |
-| `ROLE_UZYTKOWNIKOW`     | Role: ADMIN, OBYWATEL, AGENT, DEWELOPER, URZEDNIK, BANK, ANALITYK     |
-| `PRZEZNACZENIE_GRUNTOW` | Slownik przeznaczeń gruntów (MN, MW, U, R, ZL)                        |
-| `ZRODLA_OGLOSZEN`       | Portale ogłoszeniowe (Otodom, OLX, Gratka, Morizon, OBDN)             |
-| `USERS`                 | Użytkownicy systemu (imię, nazwisko, e-mail, rola)                    |
-| `DZIALKI`               | Działki gruntu (numer, obreb, gmina, powiat, województwo)             |
-| `BUDYNKI`               | Budynki (adres, rok budowy, liczba kondygnacji, źródło CEEB)          |
-| `LOKALE`                | Lokale/mieszkania (typ, metraz, kondygnacja, szacowana wartość)       |
-| `KSIEGI_WIECZYSTE`      | Księgi wieczyste EKW (numer, sad, data wpisu)                         |
-| `HISTORIA_WLASNOSCI`    | Historia własności (kto, co, kiedy — polimorficzne FK)                |
-| `HIPOTEKI`              | Hipoteki (kwota, wierzyciel, status, data wygaśnięcia)                |
-| `TRANSAKCJE`            | Transakcje rynkowe (cena, data, typ, źródło EGIB)                     |
-| `OGLOSZENIA`            | Ogłoszenia z portali (cena, status, hash deduplikacji, duplikat)      |
-| `HISTORIA_CEN_OGLOSZEN` | Historia zmian cen ogłoszeń                                           |
-| `STATYSTYKI_RYNKOWE`    | Statystyki rynku (mediana, min/max ceny/m2, liczba ofert)             |
+| Tabela                  | Opis                                                              |
+| ----------------------- | ----------------------------------------------------------------- |
+| `ROLE_UZYTKOWNIKOW`     | Role: ADMIN, OBYWATEL, AGENT, DEWELOPER, URZEDNIK, BANK, ANALITYK |
+| `PRZEZNACZENIE_GRUNTOW` | Slownik przeznaczeń gruntów (MN, MW, U, R, ZL)                    |
+| `ZRODLA_OGLOSZEN`       | Portale ogłoszeniowe (Otodom, OLX, Gratka, Morizon, OBDN)         |
+| `USERS`                 | Użytkownicy systemu (imię, nazwisko, e-mail, rola)                |
+| `DZIALKI`               | Działki gruntu (numer, obreb, gmina, powiat, województwo)         |
+| `BUDYNKI`               | Budynki (adres, rok budowy, liczba kondygnacji, źródło CEEB)      |
+| `LOKALE`                | Lokale/mieszkania (typ, metraz, kondygnacja, szacowana wartość)   |
+| `KSIEGI_WIECZYSTE`      | Księgi wieczyste EKW (numer, sad, data wpisu)                     |
+| `HISTORIA_WLASNOSCI`    | Historia własności (kto, co, kiedy — polimorficzne FK)            |
+| `HIPOTEKI`              | Hipoteki (kwota, wierzyciel, status, data wygaśnięcia)            |
+| `TRANSAKCJE`            | Transakcje rynkowe (cena, data, typ, źródło EGIB)                 |
+| `OGLOSZENIA`            | Ogłoszenia z portali (cena, status, hash deduplikacji, duplikat)  |
+| `HISTORIA_CEN_OGLOSZEN` | Historia zmian cen ogłoszeń                                       |
+| `STATYSTYKI_RYNKOWE`    | Statystyki rynku (mediana, min/max ceny/m2, liczba ofert)         |
 
 ### Widoki (OBDN)
 
@@ -380,10 +380,10 @@ OBDN_PASSWORD=<hasło użytkownika OBDN>
 
 Opcje:
 
-| Flaga / opcja               | Opis                                            |
-| --------------------------- | ----------------------------------------------- |
-| `-Reset` / `--reset`        | Usuwa i odtwarza oba schematy od zera           |
-| `-SkipData` / `--skip-data` | Tylko DDL, bez danych testowych i demo          |
+| Flaga / opcja               | Opis                                   |
+| --------------------------- | -------------------------------------- |
+| `-Reset` / `--reset`        | Usuwa i odtwarza oba schematy od zera  |
+| `-SkipData` / `--skip-data` | Tylko DDL, bez danych testowych i demo |
 
 ### Dane połączenia
 
@@ -414,15 +414,15 @@ Po uruchomieniu: **http://localhost:8978**
 Pierwsze uruchomienie poprosi o założenie lokalnego konta admina.  
 Następnie dodaj dwa osobne połączenia (PEGASUS i OBDN):
 
-| Parametr     | PEGASUS                                 | OBDN                                 |
-| ------------ | --------------------------------------- | ------------------------------------ |
-| Driver       | Oracle                                  | Oracle                               |
-| Host         | `oracle-xe`                             | `oracle-xe`                          |
-| Port         | `1521`                                  | `1521`                               |
-| Database     | `XEPDB1`                                | `XEPDB1`                             |
-| Service type | **Service Name** (nie SID!)             | **Service Name** (nie SID!)          |
-| Użytkownik   | `PEGASUS`                               | `OBDN`                               |
-| Hasło        | _(z `.env`)_                            | _(z `.env`)_                         |
+| Parametr     | PEGASUS                     | OBDN                        |
+| ------------ | --------------------------- | --------------------------- |
+| Driver       | Oracle                      | Oracle                      |
+| Host         | `oracle-xe`                 | `oracle-xe`                 |
+| Port         | `1521`                      | `1521`                      |
+| Database     | `XEPDB1`                    | `XEPDB1`                    |
+| Service type | **Service Name** (nie SID!) | **Service Name** (nie SID!) |
+| Użytkownik   | `PEGASUS`                   | `OBDN`                      |
+| Hasło        | _(z `.env`)_                | _(z `.env`)_                |
 
 > Jako hosta wpisuj `oracle-xe` (nazwa kontenera w sieci Dockera), nie `localhost`.
 
@@ -487,12 +487,12 @@ GitHub Actions uruchamia oba suite równolegle przy każdym push do `pegasus/sql
 
 ## Podział pracy
 
-| Osoba | Zakres                                                         |
-| ----- | -------------------------------------------------------------- |
-| **1** | Analiza biznesowa, diagramy przypadków użycia, opis założeń    |
-| **2** | Model ERD, słowniki, decyzje projektowe                        |
-| **3** | Diagramy czynności i stanów, widoki SQL                        |
-| **4** | DDL/DML, procedury, Docker, CI, demo                           |
+| Osoba | Zakres                                                      |
+| ----- | ----------------------------------------------------------- |
+| **1** | Analiza biznesowa, diagramy przypadków użycia, opis założeń |
+| **2** | Model ERD, słowniki, decyzje projektowe                     |
+| **3** | Diagramy czynności i stanów, widoki SQL                     |
+| **4** | DDL/DML, procedury, Docker, CI, demo                        |
 
 ---
 
