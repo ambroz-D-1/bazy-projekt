@@ -482,30 +482,3 @@ GitHub Actions uruchamia oba suite równolegle przy każdym push do `pegasus/sql
 @obdn/sql/03_views_and_procedures.sql
 @obdn/sql/04_demo_data.sql
 ```
-
----
-
-## Podział pracy
-
-| Osoba | Zakres                                                      |
-| ----- | ----------------------------------------------------------- |
-| **1** | Analiza biznesowa, diagramy przypadków użycia, opis założeń |
-| **2** | Model ERD, słowniki, decyzje projektowe                     |
-| **3** | Diagramy czynności i stanów, widoki SQL                     |
-| **4** | DDL/DML, procedury, Docker, CI, demo                        |
-
----
-
-## Konwencje Git
-
-```
-main                              ← gałąź produkcyjna
-    feat/pegasus-analiza-biznesowa
-    feat/pegasus-erd-model
-    feat/pegasus-oracle-wdrozenie
-    feat/obdn-analiza-biznesowa
-    feat/obdn-erd-model
-    feat/obdn-oracle-wdrozenie
-```
-
-Każda osoba pracuje na swojej gałęzi feature i otwiera Pull Request do `main` po zakończeniu zadania.
