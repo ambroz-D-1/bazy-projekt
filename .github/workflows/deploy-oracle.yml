@@ -5,7 +5,6 @@ on:
     branches: [ main ]
     paths:
       - "pegasus/sql/**"
-      - "obdn/sql/**"
   workflow_dispatch:
 
 env:
@@ -49,66 +48,5 @@ jobs:
           @pegasus/sql/02_insert_test_data.sql
           @pegasus/sql/03_views_and_procedures.sql
           @pegasus/sql/04_demo_data.sql
-          EXIT;
-          EOF
-
-  deploy-obdn:
-    name: Deploy OBDN schema
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout repo
-        uses: actions/checkout@v4
-
-      - name: Setup Java (wymagane przez SQLcl)
-        uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: "21"
-
-      - name: Download SQLcl
-        run: |
-          curl -sL https://download.oracle.com/otn_software/java/sqldeveloper/sqlcl-latest.zip -o sqlcl.zip
-          unzip -q sqlcl.zip -d sqlcl
-
-      - name: Decode wallet
-        run: |
-          echo "${{ secrets.ORACLE_WALLET_B64 }}" | base64 -d > wallet.zip
-          mkdir -p wallet
-          unzip -q wallet.zip -d wallet
-
-      - name: Create OBDN user (as ADMIN)
-        env:
-          ORACLE_PASSWORD: ${{ secrets.ORACLE_PASSWORD }}
-          OBDN_PASSWORD: ${{ secrets.OBDN_PASSWORD }}
-        run: |
-          chmod +x sqlcl/sqlcl/bin/sql
-
-          sqlcl/sqlcl/bin/sql -cloudconfig wallet.zip \
-            ADMIN/"${ORACLE_PASSWORD}"@pegasusdb_high <<EOF
-          DECLARE
-              v_exists NUMBER;
-          BEGIN
-              SELECT COUNT(*) INTO v_exists FROM dba_users WHERE username = 'OBDN';
-              IF v_exists = 0 THEN
-                  EXECUTE IMMEDIATE 'CREATE USER OBDN IDENTIFIED BY "${OBDN_PASSWORD}"';
-                  EXECUTE IMMEDIATE 'GRANT CONNECT, RESOURCE, UNLIMITED TABLESPACE TO OBDN';
-                  EXECUTE IMMEDIATE 'GRANT CREATE VIEW, CREATE PROCEDURE, CREATE SEQUENCE, CREATE TABLE, CREATE SESSION TO OBDN';
-              END IF;
-          END;
-          /
-          EXIT;
-          EOF
-
-      - name: Run OBDN SQL scripts (as OBDN user)
-        env:
-          OBDN_PASSWORD: ${{ secrets.OBDN_PASSWORD }}
-        run: |
-          sqlcl/sqlcl/bin/sql -cloudconfig wallet.zip \
-            OBDN/"${OBDN_PASSWORD}"@pegasusdb_high <<'EOF'
-          @obdn/sql/01_create_tables.sql
-          @obdn/sql/02_insert_test_data.sql
-          @obdn/sql/03_views_and_procedures.sql
-          @obdn/sql/04_demo_data.sql
           EXIT;
           EOF
