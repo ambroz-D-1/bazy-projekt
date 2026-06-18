@@ -1,9 +1,9 @@
 #Requires -Version 5.1
 <#
 .SYNOPSIS
-    One-click deploy PEGASUS + OBDN (Oracle XE w Dockerze)
+    One-click deploy PEGASUS (Oracle XE w Dockerze)
 .DESCRIPTION
-    Uruchamia Oracle XE i CloudBeaver, tworzy schematy PEGASUS i OBDN,
+    Uruchamia Oracle XE i CloudBeaver, tworzy schematy PEGASUS,
     laduje wszystkie dane testowe i pokazowe.
     Przy ponownym uruchomieniu: pomija DROP (chyba ze podano -Reset).
     Wymaga: Docker Desktop
@@ -52,11 +52,11 @@ function New-RandomPassword { param($suffix)
 
 Write-Host ""
 Write-Host "#===========================================#" -ForegroundColor Cyan
-Write-Host "#   PEGASUS + OBDN  –  Database Setup      #" -ForegroundColor Cyan
+Write-Host "#   PEGASUS  –  Database Setup      #" -ForegroundColor Cyan
 Write-Host "#===========================================#" -ForegroundColor Cyan
 
 # ---------------------------------------------
-Write-Step "1/8" "Sprawdzam Docker"
+Write-Step "1/6" "Sprawdzam Docker"
 # ---------------------------------------------
 if (-not (Get-Command docker -ErrorAction SilentlyContinue)) {
     Write-Fail "Docker nie jest zainstalowany. Pobierz: https://www.docker.com/products/docker-desktop/"
@@ -66,13 +66,12 @@ catch { Write-Fail "Docker Desktop nie jest uruchomiony. Uruchom go i sprobuj po
 Write-OK "Docker uruchomiony"
 
 # ---------------------------------------------
-Write-Step "2/8" "Konfiguracja .env"
+Write-Step "2/6" "Konfiguracja .env"
 # ---------------------------------------------
 if (-not (Test-Path $ENV_FILE)) {
     $oraclePwd  = New-RandomPassword "1Aa"
     $pegasusPwd = New-RandomPassword "2Bb"
-    $obdnPwd    = New-RandomPassword "3Cc"
-    "ORACLE_PASSWORD=$oraclePwd`nPEGASUS_PASSWORD=$pegasusPwd`nOBDN_PASSWORD=$obdnPwd`n" |
+    "ORACLE_PASSWORD=$oraclePwd`nPEGASUS_PASSWORD=$pegasusPwd`n" |
         Out-File $ENV_FILE -Encoding utf8 -NoNewline
     Write-OK "Plik .env wygenerowany z losowymi haslami"
 } else {
@@ -82,19 +81,11 @@ if (-not (Test-Path $ENV_FILE)) {
 $envRaw     = [System.IO.File]::ReadAllText($ENV_FILE)
 $oraclePwd  = ($envRaw -split "`n" | Where-Object { $_ -match "^ORACLE_PASSWORD="  }) -replace "^ORACLE_PASSWORD=",""  | ForEach-Object { $_.Trim() } | Select-Object -First 1
 $pegasusPwd = ($envRaw -split "`n" | Where-Object { $_ -match "^PEGASUS_PASSWORD=" }) -replace "^PEGASUS_PASSWORD=","" | ForEach-Object { $_.Trim() } | Select-Object -First 1
-$obdnPwd    = ($envRaw -split "`n" | Where-Object { $_ -match "^OBDN_PASSWORD="    }) -replace "^OBDN_PASSWORD=",""    | ForEach-Object { $_.Trim() } | Select-Object -First 1
 
 if (-not $oraclePwd -or -not $pegasusPwd) { Write-Fail "Nie udalo sie odczytac hasel z .env" }
 
-# Jesli stary .env nie mial OBDN_PASSWORD – dodaj je
-if (-not $obdnPwd) {
-    $obdnPwd = New-RandomPassword "3Cc"
-    Add-Content $ENV_FILE "`nOBDN_PASSWORD=$obdnPwd"
-    Write-Info "Dodano OBDN_PASSWORD do istniejacego .env"
-}
-
 # ---------------------------------------------
-Write-Step "3/8" "Uruchamiam Oracle XE + CloudBeaver (Docker)"
+Write-Step "3/6" "Uruchamiam Oracle XE + CloudBeaver (Docker)"
 # ---------------------------------------------
 Push-Location $ROOT
 $prevEAP = $ErrorActionPreference; $ErrorActionPreference = "Continue"
@@ -106,7 +97,7 @@ Pop-Location
 Write-OK "Kontenery uruchomione"
 
 # ---------------------------------------------
-Write-Step "4/8" "Czekam na gotowos Oracle XE (max 5 min)"
+Write-Step "4/6" "Czekam na gotowos Oracle XE (max 5 min)"
 # ---------------------------------------------
 $deadline = (Get-Date).AddMinutes(5)
 $ready = $false
@@ -185,28 +176,48 @@ EXIT;
 }
 
 # ---------------------------------------------
-Write-Step "5/8" "Tworze schemat PEGASUS"
+Write-Step "5/6" "Tworze schemat PEGASUS"
 # ---------------------------------------------
-New-OracleSchema "PEGASUS" $pegasusPwd
-Write-OK "Uzytkownik PEGASUS gotowy"
+$setupSql = @"
+-- 1. Przełącz się na właściwą bazę PDB (XEPDB1)
+ALTER SESSION SET CONTAINER = $ORACLE_SVC;
+
+"@
+
+if ($Reset) {
+    Write-Step "X" "Resetowanie schematu PEGASUS (czyszczenie)..."
+    $setupSql += @"
+-- Jeśli użytkownik nie istnieje, zignoruj błąd ORA-01918 i idź dalej
+WHENEVER SQLERROR CONTINUE;
+DROP USER PEGASUS CASCADE;
+-- Przywróć rzucanie błędów dla krytycznych operacji
+WHENEVER SQLERROR EXIT FAILURE ROLLBACK;
+"@
+}
+
+$setupSql += @"
+WHENEVER SQLERROR EXIT FAILURE ROLLBACK;
+
+-- 2. Tworzenie użytkownika PEGASUS
+CREATE USER PEGASUS IDENTIFIED BY $pegasusPwd;
+GRANT CONNECT, RESOURCE, DBA TO PEGASUS;
+
+EXIT;
+"@
+
+Write-Step "X" "Tworzenie uzytkownika i uprawnien PEGASUS..."
+$ec = Invoke-OracleSQL "/ as sysdba" $setupSql
+if ($LASTEXITCODE -ne 0) {
+    Write-Fail "Tworzenie uzytkownika PEGASUS nieudane (exit $LASTEXITCODE)"
+}
+Write-OK "Uzytkownik PEGASUS utworzony"
 
 # ---------------------------------------------
-Write-Step "6/8" "Laduje skrypty SQL – PEGASUS"
+Write-Step "6/6" "Laduje skrypty SQL – PEGASUS"
 # ---------------------------------------------
 Invoke-SqlScripts "PEGASUS" $pegasusPwd "/sql"
 Write-OK "Skrypty PEGASUS zaladowane"
 
-# ---------------------------------------------
-Write-Step "7/8" "Tworze schemat OBDN"
-# ---------------------------------------------
-New-OracleSchema "OBDN" $obdnPwd
-Write-OK "Uzytkownik OBDN gotowy"
-
-# ---------------------------------------------
-Write-Step "8/8" "Laduje skrypty SQL – OBDN"
-# ---------------------------------------------
-Invoke-SqlScripts "OBDN" $obdnPwd "/sql_obdn"
-Write-OK "Skrypty OBDN zaladowane"
 
 # ---------------------------------------------
 # Weryfikacja obu schematow
@@ -218,7 +229,7 @@ COLUMN object_type FORMAT A25
 COLUMN cnt         FORMAT 9999
 SELECT owner, object_type, COUNT(*) cnt
   FROM dba_objects
- WHERE owner IN ('PEGASUS','OBDN')
+ WHERE owner IN ('PEGASUS')
  GROUP BY owner, object_type
  ORDER BY 1, 2;
 EXIT;
@@ -240,13 +251,6 @@ Write-Host "#===========================================#" -ForegroundColor Gree
 Write-Host ""
 Write-Host "  CloudBeaver (przegladarka):" -ForegroundColor Yellow
 Write-Host "    http://localhost:8978" -ForegroundColor Yellow
-Write-Host ""
-Write-Host "  Dane polaczenia – OBDN:" -ForegroundColor White
-Write-Host "    Host:         localhost"         -ForegroundColor White
-Write-Host "    Port:         $port"             -ForegroundColor White
-Write-Host "    Service name: $ORACLE_SVC"       -ForegroundColor White
-Write-Host "    Uzytkownik:   OBDN"              -ForegroundColor White
-Write-Host "    Haslo:        $obdnPwd"          -ForegroundColor White
 Write-Host ""
 Write-Host "  Dane polaczenia – PEGASUS:" -ForegroundColor White
 Write-Host "    Uzytkownik:   PEGASUS"            -ForegroundColor White
