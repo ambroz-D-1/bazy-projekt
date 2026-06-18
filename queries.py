@@ -1,0 +1,1 @@
+login = """SELECT * FROM ADMINS WHERE USERNAME = (%s) AND PASSWORD = (%s) """
