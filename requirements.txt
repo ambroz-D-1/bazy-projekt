@@ -1,0 +1,5 @@
+dotenv
+#os
+oracledb
+#psycopg2 # for Windows
+psycopg2-binary #for Linux and MacOS
