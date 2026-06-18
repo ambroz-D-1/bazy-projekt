@@ -1,54 +1,10 @@
 # Projekt UI – PEGASUS
 
-Interfejs webowy, dwie role: Admin i Użytkownik. Poniżej opis ekranów i formularzy.
+---
 
 ---
 
-## Ekran 1: Feed (Użytkownik)
-
-Lista postów. Czas spędzony na poście mierzony przez Intersection Observer i wysyłany przy opuszczeniu.
-
-```
-+------------------------------------------+
-|  PEGASUS                    [Jan Kowalski]|
-+------------------------------------------+
-| +--------------------------------------+ |
-| | [Polityka]                           | |
-| | Nowe wyniki wyborów samorządowych    | |
-| | Treść posta... lorem ipsum...        | |
-| | ──────────────────────────────────── | |
-| | [Lubię (124)]  [Komentarz]  [Udostep]| |
-| +--------------------------------------+ |
-| +--------------------------------------+ |
-| | [Sport]                              | |
-| | Wyniki Ligi Mistrzów                 | |
-| | ...                                  | |
-| +--------------------------------------+ |
-+------------------------------------------+
-```
-
-Kliknięcie „Lubię/Komentarz/Udostępnij" → INSERT do LIKES/COMMENTS/SHARES z TIME_SPENT_SEC, po czym trigger aktualizuje USER_PROFILES.
-
----
-
-## Ekran 2: Widok moich interakcji (Użytkownik)
-
-Zakładki: **Polubione** | **Komentarze** | **Udostępnienia**
-
-Dane z widoku V_MY_INTERACTIONS – użytkownik widzi tylko swoje wpisy.
-
-```
-Moje polubione
-──────────────────────────────────────────
-Post                          Data          Czas
-"Nowe wyniki wyborów..."      2025-10-15    2:34
-"Reforma systemu edukacji"    2025-10-14    1:02
-"Liga Mistrzów – finał"       2025-10-13    0:45
-```
-
----
-
-## Ekran 3: Panel Admina – lista użytkowników
+## Ekran 1: Panel Admina – lista użytkowników
 
 ```
 Użytkownicy                                      [Filtry v]
@@ -71,7 +27,7 @@ Piotr Wisniewski   0.91            PRAWICOWY    TAK     [profil]
 
 ---
 
-## Ekran 4: Pełny profil użytkownika (Admin)
+## Ekran 2: Pełny profil użytkownika (Admin)
 
 Dane z widoku V_USER_FULL_PROFILE.
 
@@ -102,7 +58,7 @@ Timeline poglądów (POLITICAL_SCORE w czasie):
 
 ---
 
-## Ekran 5: Ranking postów (Admin)
+## Ekran 3: Ranking postów (Admin)
 
 ```
 Ranking postów wg zaangażowania
@@ -117,12 +73,13 @@ Przycisk „Oznacz" przy poście → dodaje do raportu ostrzeżeń widocznego ty
 
 ---
 
-## Ekran 6: Formularz dodawania posta (Użytkownik)
+## Ekran 4: Dodawanie admina (BigYahoo)
+```
+Dodaj konto administratora
 
-| Pole       | Typ wejścia                              |
-|------------|------------------------------------------|
-| Kategoria  | select (lista z POST_CATEGORIES)         |
-| Treść      | textarea, max 2000 znaków                |
-| Tagi       | text, oddzielone przecinkami             |
+Nazwa użytkownika:_______
+Poziom uprawnień (1-5):__
+Hasło: __________________
 
-Po zapisaniu post trafia do feeda. System zaczyna rejestrować interakcje od razu.
+```
+
