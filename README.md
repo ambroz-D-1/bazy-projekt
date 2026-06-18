@@ -1,11 +1,10 @@
-# PEGASUS + OBDN – Projekt bazy danych
+# PEGASUS – Projekt bazy danych
 
-Dwa niezależne systemy baz danych:
+System baz danych:
 
 - **PEGASUS** — System Analizy Behawioralnej Platformy Społecznościowej
-- **OBDN** — Ogólnopolska Baza Danych Nieruchomości
 
-Oba działają na Oracle 21c (lokalnie przez Docker XE, produkcyjnie przez Oracle Autonomous Database).
+Działający na Oracle 21c (lokalnie przez Docker XE, produkcyjnie przez Oracle Autonomous Database).
 
 ---
 
@@ -27,42 +26,20 @@ Oba działają na Oracle 21c (lokalnie przez Docker XE, produkcyjnie przez Oracl
 ├── setup.sh                    ← jednoklokowe wdrożenie Linux/macOS (PEGASUS + OBDN)
 ├── docker-compose.yml          ← Oracle XE + CloudBeaver
 │
-├── pegasus/
-│   ├── analysis/
-│   │   ├── Analiza biznesowa UML.md
-│   │   ├── Algorytm analizy behawioralnej UML.md
-│   │   ├── Model ERD.md
-│   │   └── PEGASUSownik.md
-│   ├── diagrams/
-│   │   ├── 01_use_case.puml
-│   │   ├── 02_activity_profile_calc.puml
-│   │   ├── 03_activity_user_interaction.puml
-│   │   ├── 04_state_user.puml
-│   │   └── 05_erd.puml
-│   ├── sql/
-│   │   ├── 00_setup_schema.sql           ← użytkownik PEGASUS (lokalnie / XE)
-│   │   ├── 01_create_tables.sql
-│   │   ├── 02_insert_test_data.sql
-│   │   ├── 03_views_and_procedures.sql
-│   │   └── 04_demo_data.sql
-│   └── tests/
-│       ├── test_database.py
-│       └── requirements.txt
-│
-└── obdn/
+└── pegasus/
     ├── analysis/
     │   ├── Analiza biznesowa UML.md
-    │   ├── Algorytm systemu UML.md
+    │   ├── Algorytm analizy behawioralnej UML.md
     │   ├── Model ERD.md
-    │   └── Opis założeń.md
+    │   └── PEGASUSownik.md
     ├── diagrams/
     │   ├── 01_use_case.puml
-    │   ├── 02_activity_wyszukiwanie.puml
-    │   ├── 03_activity_ogloszenie.puml
-    │   ├── 04_state_ogloszenie.puml
+    │   ├── 02_activity_profile_calc.puml
+    │   ├── 03_activity_user_interaction.puml
+    │   ├── 04_state_user.puml
     │   └── 05_erd.puml
     ├── sql/
-    │   ├── 00_setup_schema.sql           ← użytkownik OBDN (lokalnie / XE)
+    │   ├── 00_setup_schema.sql           ← użytkownik PEGASUS (lokalnie / XE)
     │   ├── 01_create_tables.sql
     │   ├── 02_insert_test_data.sql
     │   ├── 03_views_and_procedures.sql
@@ -175,174 +152,6 @@ erDiagram
 
 ---
 
-## OBDN — Ogólnopolska Baza Danych Nieruchomości
-
-Rejestr nieruchomości spinający w jedno dane z EGIB, EKW, TERYT i CEEB oraz ogłoszenia z zewnętrznych portali (Otodom, OLX, Gratka, Morizon). Trzypoziomowa hierarchia: działka → budynek → lokal. Role: Admin, Obywatel, Agent, Deweloper, Urzędnik, Bank, Analityk.
-
-### Model ERD (OBDN)
-
-```mermaid
-erDiagram
-  ROLE_UZYTKOWNIKOW {
-    int ROLA_ID PK
-    string NAZWA
-  }
-  USERS {
-    int USER_ID PK
-    string IMIE
-    string NAZWISKO
-    string EMAIL
-    int ROLA_ID FK
-  }
-  PRZEZNACZENIE_GRUNTOW {
-    int PRZEZNACZENIE_ID PK
-    string KOD
-    string OPIS
-  }
-  ZRODLA_OGLOSZEN {
-    int ZRODLO_ID PK
-    string NAZWA
-    string URL
-  }
-  DZIALKI {
-    int DZIALKA_ID PK
-    string NR_DZIALKI
-    string OBREB
-    string GMINA
-    string POWIAT
-    string WOJEWODZTWO
-    int PRZEZNACZENIE_ID FK
-  }
-  BUDYNKI {
-    int BUDYNEK_ID PK
-    int DZIALKA_ID FK
-    string ULICA
-    string NR_BUDYNKU
-    string MIASTO
-    int ROK_BUDOWY
-  }
-  LOKALE {
-    int LOKAL_ID PK
-    int BUDYNEK_ID FK
-    string NR_LOKALU
-    string TYP_LOKALU
-    number METRAZ_M2
-    number SZACOWANA_WARTOSC
-  }
-  KSIEGI_WIECZYSTE {
-    int KW_ID PK
-    string NR_KW
-    int DZIALKA_ID FK
-  }
-  HISTORIA_WLASNOSCI {
-    int HISTORIA_ID PK
-    int DZIALKA_ID FK
-    int BUDYNEK_ID FK
-    int LOKAL_ID FK
-    int USER_ID FK
-    date DATA_OD
-    date DATA_DO
-  }
-  HIPOTEKI {
-    int HIPOTEKA_ID PK
-    int LOKAL_ID FK
-    int DZIALKA_ID FK
-    int KW_ID FK
-    number KWOTA
-    string STATUS
-  }
-  TRANSAKCJE {
-    int TRANSAKCJA_ID PK
-    int LOKAL_ID FK
-    int DZIALKA_ID FK
-    number CENA
-    date DATA_TRANSAKCJI
-  }
-  OGLOSZENIA {
-    int OGLOSZENIE_ID PK
-    int LOKAL_ID FK
-    int BUDYNEK_ID FK
-    int DZIALKA_ID FK
-    int ZRODLO_ID FK
-    string TYP_OGLOSZENIA
-    number CENA
-    string STATUS
-    string HASH_DEDUPLIKACJI
-    int DUPLIKAT_GLOWNEGO_ID FK
-  }
-  HISTORIA_CEN_OGLOSZEN {
-    int HISTORIA_ID PK
-    int OGLOSZENIE_ID FK
-    number CENA_POPRZEDNIA
-    number CENA_NOWA
-  }
-  STATYSTYKI_RYNKOWE {
-    int STATYSTYKA_ID PK
-    int MIESIAC
-    int ROK
-    string MIASTO
-    string TYP_NIERUCHOMOSCI
-    number MEDIANA_CENY_M2
-  }
-
-  ROLE_UZYTKOWNIKOW ||--o{ USERS : "ma role"
-  PRZEZNACZENIE_GRUNTOW ||--o{ DZIALKI : "określa"
-  DZIALKI ||--o{ BUDYNKI : "zawiera"
-  BUDYNKI ||--o{ LOKALE : "zawiera"
-  DZIALKI ||--o{ KSIEGI_WIECZYSTE : "dotyczy"
-  LOKALE ||--o{ HISTORIA_WLASNOSCI : "historia (opcj.)"
-  DZIALKI ||--o{ HISTORIA_WLASNOSCI : "historia (opcj.)"
-  USERS ||--o{ HISTORIA_WLASNOSCI : "właściciel"
-  LOKALE ||--o{ HIPOTEKI : "obciąża (opcj.)"
-  KSIEGI_WIECZYSTE ||--o{ HIPOTEKI : "wpis"
-  LOKALE ||--o{ TRANSAKCJE : "transakcja (opcj.)"
-  DZIALKI ||--o{ TRANSAKCJE : "transakcja (opcj.)"
-  LOKALE ||--o{ OGLOSZENIA : "ogłoszenie (opcj.)"
-  BUDYNKI ||--o{ OGLOSZENIA : "ogłoszenie (opcj.)"
-  DZIALKI ||--o{ OGLOSZENIA : "ogłoszenie (opcj.)"
-  ZRODLA_OGLOSZEN ||--o{ OGLOSZENIA : "źródło"
-  OGLOSZENIA ||--o{ OGLOSZENIA : "duplikat"
-  OGLOSZENIA ||--o{ HISTORIA_CEN_OGLOSZEN : "historia cen"
-```
-
-### Tabele (OBDN)
-
-| Tabela                  | Opis                                                              |
-| ----------------------- | ----------------------------------------------------------------- |
-| `ROLE_UZYTKOWNIKOW`     | Role: ADMIN, OBYWATEL, AGENT, DEWELOPER, URZEDNIK, BANK, ANALITYK |
-| `PRZEZNACZENIE_GRUNTOW` | Slownik przeznaczeń gruntów (MN, MW, U, R, ZL)                    |
-| `ZRODLA_OGLOSZEN`       | Portale ogłoszeniowe (Otodom, OLX, Gratka, Morizon, OBDN)         |
-| `USERS`                 | Użytkownicy systemu (imię, nazwisko, e-mail, rola)                |
-| `DZIALKI`               | Działki gruntu (numer, obreb, gmina, powiat, województwo)         |
-| `BUDYNKI`               | Budynki (adres, rok budowy, liczba kondygnacji, źródło CEEB)      |
-| `LOKALE`                | Lokale/mieszkania (typ, metraz, kondygnacja, szacowana wartość)   |
-| `KSIEGI_WIECZYSTE`      | Księgi wieczyste EKW (numer, sad, data wpisu)                     |
-| `HISTORIA_WLASNOSCI`    | Historia własności (kto, co, kiedy — polimorficzne FK)            |
-| `HIPOTEKI`              | Hipoteki (kwota, wierzyciel, status, data wygaśnięcia)            |
-| `TRANSAKCJE`            | Transakcje rynkowe (cena, data, typ, źródło EGIB)                 |
-| `OGLOSZENIA`            | Ogłoszenia z portali (cena, status, hash deduplikacji, duplikat)  |
-| `HISTORIA_CEN_OGLOSZEN` | Historia zmian cen ogłoszeń                                       |
-| `STATYSTYKI_RYNKOWE`    | Statystyki rynku (mediana, min/max ceny/m2, liczba ofert)         |
-
-### Widoki (OBDN)
-
-- `V_OGLOSZENIA_AKTYWNE` — aktywne oferty z adresem i danymi wystawiającego
-- `V_HISTORIA_WLASNOSCI_PELNA` — pełna historia właścicieli z adresem nieruchomości
-- `V_HIPOTEKI_AKTYWNE` — aktywne hipoteki
-- `V_STATYSTYKI_RYNKOWE_SUMMARY` — statystyki per miasto/typ/rok
-- `V_DUPLIKATY_OGLOSZEN` — ogłoszenia zdeduplikowane (to samo mieszkanie na kilku portalach)
-- `V_PORTFEL_AGENTA` — aktywne ogłoszenia agenta
-
-### Procedury (OBDN)
-
-`SP_SZACUJ_WARTOSC_LOKALU(p_lokal_id)` — liczy szacunkową wartość przez medianę ceny/m² z transakcji z ostatnich 12 miesięcy w tym samym mieście.
-
-`SP_DEDUPLIKUJ_OGLOSZENIA` — SHA-256 hash na podstawie id nieruchomości + typ ogłoszenia; oznacza duplikaty między portalami.
-
-`SP_OBLICZ_STATYSTYKI_RYNKOWE(p_miasto, p_rok, p_miesiac)` — MERGE do tabeli statystyk (COUNT, AVG, MEDIAN, MIN, MAX ceny/m²).
-
----
-
 ## Uruchamianie lokalnie (Docker + Oracle XE)
 
 ### Wymagania
@@ -368,14 +177,12 @@ Skrypt automatycznie:
 1. Uruchamia kontener Oracle XE i CloudBeaver,
 2. Czeka na gotowość bazy (do 5 minut),
 3. Tworzy schemat `PEGASUS` → ładuje wszystkie skrypty SQL,
-4. Tworzy schemat `OBDN` → ładuje wszystkie skrypty SQL.
 
 Hasła są generowane losowo przy pierwszym uruchomieniu i zapisywane do `.env`:
 
 ```
 ORACLE_PASSWORD=<hasło SYS>
 PEGASUS_PASSWORD=<hasło użytkownika PEGASUS>
-OBDN_PASSWORD=<hasło użytkownika OBDN>
 ```
 
 Opcje:
@@ -387,8 +194,6 @@ Opcje:
 
 ### Dane połączenia
 
-**PEGASUS:**
-
 | Parametr     | Wartość                                 |
 | ------------ | --------------------------------------- |
 | Host         | `localhost`                             |
@@ -397,32 +202,22 @@ Opcje:
 | Użytkownik   | `PEGASUS`                               |
 | Hasło        | _(wartość `PEGASUS_PASSWORD` z `.env`)_ |
 
-**OBDN:**
-
-| Parametr     | Wartość                              |
-| ------------ | ------------------------------------ |
-| Host         | `localhost`                          |
-| Port         | `1522`                               |
-| Service name | `XEPDB1`                             |
-| Użytkownik   | `OBDN`                               |
-| Hasło        | _(wartość `OBDN_PASSWORD` z `.env`)_ |
-
 ### Panel administracyjny (CloudBeaver)
 
 Po uruchomieniu: **http://localhost:8978**
 
 Pierwsze uruchomienie poprosi o założenie lokalnego konta admina.  
-Następnie dodaj dwa osobne połączenia (PEGASUS i OBDN):
+Następnie dodaj dane połączenia:
 
-| Parametr     | PEGASUS                     | OBDN                        |
-| ------------ | --------------------------- | --------------------------- |
-| Driver       | Oracle                      | Oracle                      |
-| Host         | `oracle-xe`                 | `oracle-xe`                 |
-| Port         | `1521`                      | `1521`                      |
-| Database     | `XEPDB1`                    | `XEPDB1`                    |
-| Service type | **Service Name** (nie SID!) | **Service Name** (nie SID!) |
-| Użytkownik   | `PEGASUS`                   | `OBDN`                      |
-| Hasło        | _(z `.env`)_                | _(z `.env`)_                |
+| Parametr     | PEGASUS                     |
+| ------------ | --------------------------- |
+| Driver       | Oracle                      |
+| Host         | `oracle-xe`                 |
+| Port         | `1521`                      |
+| Database     | `XEPDB1`                    |
+| Service type | **Service Name** (nie SID!) |
+| Użytkownik   | `PEGASUS`                   |
+| Hasło        | _(z `.env`)_                |
 
 > Jako hosta wpisuj `oracle-xe` (nazwa kontenera w sieci Dockera), nie `localhost`.
 
@@ -449,13 +244,9 @@ Fixture `setup_database` automatycznie tworzy schemat i ładuje SQL — testy mo
 # PEGASUS
 pip install -r pegasus/tests/requirements.txt
 ORACLE_SYS_PASSWORD=... PEGASUS_PASSWORD=... pytest pegasus/tests/test_database.py -v
-
-# OBDN
-pip install -r obdn/tests/requirements.txt
-ORACLE_SYS_PASSWORD=... OBDN_PASSWORD=... pytest obdn/tests/test_database.py -v
 ```
 
-GitHub Actions uruchamia oba suite równolegle przy każdym push do `pegasus/sql/**` lub `obdn/sql/**`.
+GitHub Actions uruchamia oba suite równolegle przy każdym push do `pegasus/sql/**`.
 
 ---
 
@@ -468,17 +259,4 @@ GitHub Actions uruchamia oba suite równolegle przy każdym push do `pegasus/sql
 @pegasus/sql/02_insert_test_data.sql
 @pegasus/sql/03_views_and_procedures.sql
 @pegasus/sql/04_demo_data.sql
-```
-
-**OBDN** — najpierw utwórz użytkownika `OBDN` jako `ADMIN`, potem jako `OBDN`:
-
-```sql
--- jako ADMIN: utwórz użytkownika OBDN i nadaj uprawnienia
-@obdn/sql/00_setup_schema.sql
-
--- jako OBDN:
-@obdn/sql/01_create_tables.sql
-@obdn/sql/02_insert_test_data.sql
-@obdn/sql/03_views_and_procedures.sql
-@obdn/sql/04_demo_data.sql
 ```
