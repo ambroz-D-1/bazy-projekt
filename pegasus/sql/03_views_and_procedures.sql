@@ -7,48 +7,6 @@
 SET SQLBLANKLINES ON
 
 -- ============================================================
--- Widok: Aktywnosc uzytkownika (sumaryczna)
--- ============================================================
-CREATE OR REPLACE VIEW V_USER_ACTIVITY AS
-SELECT
-    u.USER_ID,
-    u.FIRST_NAME || ' ' || u.LAST_NAME AS FULL_NAME,
-    u.STATUS,
-    COUNT(DISTINCT l.LIKE_ID) AS TOTAL_LIKES,
-    COUNT(DISTINCT c.COMMENT_ID) AS TOTAL_COMMENTS,
-    COUNT(DISTINCT s.SHARE_ID) AS TOTAL_SHARES,
-    COUNT(DISTINCT v.VIEW_ID) AS TOTAL_VIEWS,
-    ROUND(
-        AVG(
-            (
-                EXTRACT(
-                    HOUR
-                    FROM (v.VIEW_END - v.VIEW_START)
-                ) * 3600 + EXTRACT(
-                    MINUTE
-                    FROM (v.VIEW_END - v.VIEW_START)
-                ) * 60 + EXTRACT(
-                    SECOND
-                    FROM (v.VIEW_END - v.VIEW_START)
-                )
-            )
-        ),
-        1
-    ) AS AVG_VIEW_DURATION_SEC
-FROM
-    USERS u
-    LEFT JOIN LIKES l ON l.USER_ID = u.USER_ID
-    LEFT JOIN COMMENTS c ON c.USER_ID = u.USER_ID
-    LEFT JOIN SHARES s ON s.FROM_USER_ID = u.USER_ID
-    LEFT JOIN POST_VIEWS v ON v.USER_ID = u.USER_ID
-    AND v.VIEW_END IS NOT NULL
-GROUP BY
-    u.USER_ID,
-    u.FIRST_NAME,
-    u.LAST_NAME,
-    u.STATUS;
-
--- ============================================================
 -- Widok: Preferowana kategoria (top 1 na uzytkownika)
 -- Uwzglednia polubienia, komentarze (x3) i udostepnienia (x2)
 -- Agreguje wszystkie interakcje PRZED rankingiem – bez duplikatow
@@ -177,9 +135,9 @@ FROM
     LEFT JOIN POST_CATEGORIES pc ON pc.CATEGORY_ID = up.PREFERRED_CATEGORY_ID;
 
 -- ============================================================
--- Widok: Interakcje uzytkownika (dla samego uzytkownika)
+-- Widok: Wszystkie interakcje
 -- ============================================================
-CREATE OR REPLACE VIEW V_MY_INTERACTIONS AS
+CREATE OR REPLACE VIEW V_ALL_INTERACTIONS AS
 SELECT
     'LIKE' AS INTERACTION_TYPE,
     l.USER_ID,
@@ -188,7 +146,6 @@ SELECT
     pc.NAME AS CATEGORY,
     l.LIKED_AT AS INTERACTION_DATE,
     NULL AS COMMENT_TEXT,
-    l.TIME_SPENT_SEC
 FROM
     LIKES l
     JOIN POSTS p ON p.POST_ID = l.POST_ID
@@ -202,7 +159,6 @@ SELECT
     pc.NAME AS CATEGORY,
     c.COMMENTED_AT,
     c.CONTENT,
-    c.TIME_SPENT_SEC
 FROM
     COMMENTS c
     JOIN POSTS p ON p.POST_ID = c.POST_ID
@@ -216,11 +172,118 @@ SELECT
     pc.NAME AS CATEGORY,
     s.SHARED_AT,
     NULL AS COMMENT_TEXT,
-    s.TIME_SPENT_SEC
 FROM
     SHARES s
     JOIN POSTS p ON p.POST_ID = s.POST_ID
     JOIN POST_CATEGORIES pc ON pc.CATEGORY_ID = p.CATEGORY_ID;
+
+
+
+-- ============================================================
+-- Materialized Views — analityka uzytkownikow
+-- Odswiezane raz dziennie przez DBMS_SCHEDULER (patrz nizej)
+-- Recznie: EXEC REFRESH_ANALYTICS('MANUAL');
+-- ============================================================
+
+-- ------------------------------------------------------------
+-- MV 1: Dzienna aktywnosc uzytkownika
+--        (lajki, komentarze, udostepnienia per user)
+-- ------------------------------------------------------------
+CREATE MATERIALIZED VIEW MV_USER_DAILY_ACTIVITY
+    BUILD DEFERRED
+    REFRESH COMPLETE ON DEMAND
+AS
+SELECT
+    u.USER_ID,
+    u.FIRST_NAME,
+    u.LAST_NAME,
+    u.STATUS,
+    COUNT(DISTINCT l.LIKE_ID)    AS TOTAL_LIKES,
+    COUNT(DISTINCT c.COMMENT_ID) AS TOTAL_COMMENTS,
+    COUNT(DISTINCT s.SHARE_ID)   AS TOTAL_SHARES,
+    COUNT(DISTINCT v.VIEW_ID) AS TOTAL_VIEWS,
+    COUNT(DISTINCT l.LIKE_ID)
+        + COUNT(DISTINCT c.COMMENT_ID)
+        + COUNT(DISTINCT s.SHARE_ID)  AS TOTAL_INTERACTIONS,
+    SYSDATE                           AS SNAPSHOT_DATE
+FROM   USERS u
+LEFT JOIN LIKES    l ON l.USER_ID      = u.USER_ID
+LEFT JOIN COMMENTS c ON c.USER_ID      = u.USER_ID
+LEFT JOIN SHARES   s ON s.FROM_USER_ID = u.USER_ID
+LEFT JOIN POST_VIEWS v ON v.USER_ID = u.USER_ID
+GROUP BY u.USER_ID, u.FIRST_NAME, u.LAST_NAME, u.STATUS;
+
+-- ------------------------------------------------------------
+-- MV 2: Ranking uzytkownikow wg engagement score
+-- ------------------------------------------------------------
+CREATE MATERIALIZED VIEW MV_USER_ENGAGEMENT_RANKING
+    BUILD DEFERRED
+    REFRESH COMPLETE ON DEMAND
+AS
+SELECT
+    u.USER_ID,
+    u.FIRST_NAME || ' ' || u.LAST_NAME AS FULL_NAME,
+    u.STATUS,
+    up.ENGAGEMENT_SCORE,
+    up.POLITICAL_LEAN,
+    up.EXTREMISM_EXPOSURE,
+    RANK() OVER (ORDER BY up.ENGAGEMENT_SCORE DESC) AS ENGAGEMENT_RANK,
+    SYSDATE AS SNAPSHOT_DATE
+FROM   USERS u
+JOIN   USER_PROFILES up ON up.USER_ID = u.USER_ID
+WHERE  u.STATUS != 'DELETED';
+
+
+-- ============================================================
+-- Procedura odswiezajaca wszystkie MV
+-- ============================================================
+CREATE OR REPLACE PROCEDURE REFRESH_ANALYTICS
+    (p_called_by VARCHAR2 DEFAULT 'SCHEDULER')
+IS
+    v_start   TIMESTAMP := SYSTIMESTAMP;
+    v_end     TIMESTAMP;
+    v_elapsed NUMBER;
+BEGIN
+    DBMS_OUTPUT.PUT_LINE(
+        '[' || TO_CHAR(v_start, 'YYYY-MM-DD HH24:MI:SS') || '] '
+        || 'Odswiezanie analytics uruchomione przez: ' || p_called_by
+    );
+    DBMS_MVIEW.REFRESH('MV_USER_DAILY_ACTIVITY',     method => 'C', atomic_refresh => FALSE);
+    DBMS_MVIEW.REFRESH('MV_USER_ENGAGEMENT_RANKING', method => 'C', atomic_refresh => FALSE);
+    v_end     := SYSTIMESTAMP;
+    v_elapsed := EXTRACT(SECOND FROM (v_end - v_start));
+    DBMS_OUTPUT.PUT_LINE(
+        '[' || TO_CHAR(v_end, 'YYYY-MM-DD HH24:MI:SS') || '] '
+        || 'Zakonczone. Czas: ' || v_elapsed || 's'
+    );
+EXCEPTION
+    WHEN OTHERS THEN
+        DBMS_OUTPUT.PUT_LINE('BLAD odswiezania analytics: ' || SQLERRM);
+        RAISE;
+END REFRESH_ANALYTICS;
+/
+
+
+-- ============================================================
+-- DBMS_SCHEDULER — automatyczne uruchomienie codziennie o 03:00
+-- Recznie: EXEC REFRESH_ANALYTICS('MANUAL');
+--          lub: EXEC DBMS_SCHEDULER.RUN_JOB('JOB_REFRESH_ANALYTICS');
+-- ============================================================
+BEGIN
+    DBMS_SCHEDULER.CREATE_JOB (
+        job_name        => 'JOB_REFRESH_ANALYTICS',
+        job_type        => 'STORED_PROCEDURE',
+        job_action      => 'REFRESH_ANALYTICS',
+        start_date      => TRUNC(SYSTIMESTAMP) + INTERVAL '3' HOUR,
+        repeat_interval => 'FREQ=DAILY; BYHOUR=3; BYMINUTE=0; BYSECOND=0',
+        end_date        => NULL,
+        enabled         => TRUE,
+        auto_drop       => FALSE,
+        comments        => 'Codzienne odswiezanie materialized views analityki uzytkownikow'
+    );
+END;
+/
+
 
 -- ============================================================
 -- Procedura: oblicz i zapisz profil behawioralny uzytkownika
