@@ -1,30 +1,71 @@
-@startuml
-title Diagram stanu – Status konta uzytkownika
+@startuml user_state_diagram
+skinparam backgroundColor #FAFAFA
+skinparam state {
+    BackgroundColor #EEF4FF
+    BorderColor     #4A6FA5
+    FontName        Arial
+    FontSize        13
+    ArrowColor      #4A6FA5
+    ArrowFontSize   11
+    ArrowFontColor  #333333
+}
+skinparam noteFontSize 11
+skinparam noteBackgroundColor #FFFDE7
+skinparam noteBorderColor #C8A000
+skinparam shadowing false
 
-[*] --> Aktywny : Rejestracja w systemie
+title Diagram stanow konta uzytkownika\n<size:11>(tabela USER_STATUSES)</size>
 
-Aktywny --> Obserwowany : extremism_exposure = 1\n(automatycznie przez system)
-Obserwowany --> Aktywny  : Admin zdejmuje flage
+[*] -[#2E7D32]--> ACTIVE : <<rejestracja>>
 
-Aktywny    --> Zawieszony : Admin zawiesza konto\n(decyzja moderacyjna)
-Obserwowany --> Zawieszony : Admin zawiesza konto
+state ACTIVE
+state SUSPENDED
+state WATCHED
+state DELETED
 
-Zawieszony --> Aktywny    : Admin przywraca konto
-
-Aktywny    --> Usuniety   : Usuniecie konta
-Zawieszony --> Usuniety   : Usuniecie konta
-Obserwowany --> Usuniety  : Usuniecie konta
-
-Usuniety --> [*]
-
-note right of Obserwowany
-  STATUS = 'WATCHED'
-  extremism_exposure = 1
-  Widoczny w panelu admina
+note right of ACTIVE
+  Konto aktywne i
+  w pelni funkcjonalne
 end note
 
-note right of Zawieszony
-  STATUS = 'SUSPENDED'
-  Uzytkownik nie moze\nwchodzic w interakcje
+note right of SUSPENDED
+  Konto tymczasowo
+  zawieszone przez
+  administratora
 end note
+
+note left of WATCHED
+  Konto pod szczegolna
+  obserwacja moderatora
+end note
+
+note left of DELETED
+  Konto oznaczone jako
+  usuniete (soft delete)
+end note
+
+' --- Przejscia z ACTIVE ---
+ACTIVE    -[#FF6F00]-> SUSPENDED : admin (lvl >= 3)\nzawiesza konto
+ACTIVE    -[#7B1FA2]-> WATCHED   : moderator (lvl >= 2)\nobserwuje konto
+ACTIVE    -[#B71C1C]-> DELETED   : uzytkownik / admin\nusuwa konto (soft)
+
+' --- Przejscia z SUSPENDED ---
+SUSPENDED -[#2E7D32]-> ACTIVE    : admin (lvl >= 3)\nprzywraca konto
+SUSPENDED -[#B71C1C]-> DELETED   : admin usuwa\nzawieszone konto
+
+' --- Przejscia z WATCHED ---
+WATCHED   -[#2E7D32]-> ACTIVE    : moderator\nzdejmuje obserwacje
+WATCHED   -[#FF6F00]-> SUSPENDED : eskalacja -\nadmin zawiesza
+WATCHED   -[#B71C1C]-> DELETED   : admin usuwa\nobserwowane konto
+
+DELETED -[#555555]-> [*]
+
+legend right
+  | Kolor strzalki        | Znaczenie              |
+  | <#2E7D32> zielony     | przywrocenie / start   |
+  | <#FF6F00> pomaranczowy| zawieszenie            |
+  | <#7B1FA2> fioletowy   | obserwacja             |
+  | <#B71C1C> czerwony    | usuniecie (soft delete)|
+endlegend
+
 @enduml
