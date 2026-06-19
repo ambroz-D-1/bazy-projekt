@@ -7,10 +7,11 @@ import oracledb
 import queries
 
 help_str="""
-    add-admin: create new admin account
     clear: clear TUI
     exit: exit program
     help: show this list
+    query: execute provided SQL query
+    refresh: re-evaluate analytics
     set-status <status> <user_id>: change user's status
         <status>: ACTIVE | DELETED | SUSPENDED | WATCHED
     table <option>:
@@ -19,7 +20,7 @@ help_str="""
     view <option>:
         -list: list all available views
         -show <view_id>:show contents of selected view
-    
+    add-admin: create new admin account
 """
 
 load_dotenv()
@@ -68,6 +69,12 @@ def table(options:list = []):
     except IndexError:
         print("Must provide a valid option")
         return
+
+def refreshAnalytics():
+    if permLevel < permissions["TopGuy"]:
+        print("You do not have permissions to use this command")
+        return
+    executeQuery(queries.refreshAnalytics)
 
 def setStatus(options:list = []):
     if permLevel < permissions["TopGuy"]:
@@ -122,6 +129,8 @@ def mainLoop(command: list)->None:
             table(command[1:])
         case "set-status":
             setStatus(command[1:])
+        case "refresh":
+            refreshAnalytics()
         case "query":
             query()
         case "add-admin":
@@ -135,7 +144,7 @@ def mainLoop(command: list)->None:
         case _:
             print(f"Unknown command '{command}' - see 'help'")
 
-def executeQuery(sqlQuery: str, param: tuple)->list:
+def executeQuery(sqlQuery: str, param: tuple = ())->list:
     if not sqlQuery:
         print("    WARNING! executeQuery: No query provided!")
         return []
