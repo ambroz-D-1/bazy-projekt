@@ -27,26 +27,18 @@ Działający na Oracle 21c (lokalnie przez Docker XE, produkcyjnie przez Oracle 
 ├── docker-compose.yml          ← Oracle XE + CloudBeaver
 │
 └── pegasus/
-    ├── analysis/
-    │   ├── Analiza biznesowa UML.md
-    │   ├── Algorytm analizy behawioralnej UML.md
-    │   ├── Model ERD.md
-    │   └── PEGASUSownik.md
     ├── diagrams/
     │   ├── 01_use_case.puml
     │   ├── 02_activity_profile_calc.puml
-    │   ├── 03_activity_user_interaction.puml
-    │   ├── 04_state_user.puml
-    │   └── 05_erd.puml
+    │   ├── 03_state_user.puml
+    │   └── 04_erd.puml
     ├── sql/
-    │   ├── 00_setup_schema.sql           ← użytkownik PEGASUS (lokalnie / XE)
-    │   ├── 01_create_tables.sql
-    │   ├── 02_insert_test_data.sql
-    │   ├── 03_views_and_procedures.sql
-    │   └── 04_demo_data.sql
-    └── tests/
-        ├── test_database.py
-        └── requirements.txt
+        ├── 00_setup_schema.sql           ← użytkownik PEGASUS (lokalnie / XE)
+        ├── 01_create_tables.sql
+        ├── 02_insert_test_data.sql
+        ├── 03_views_and_procedures.sql
+        └── 04_demo_data.sql
+
 ```
 
 ---
@@ -82,7 +74,6 @@ erDiagram
     int id PK
     string typ
     datetime czas
-    int czasSpedzonyNaPostie
     int idUzytkownikaFK
     int idPostuFK
     int idAdresataFK
@@ -116,40 +107,47 @@ erDiagram
   Uzytkownik ||--|| ProfilAnalityczny : "ma"
 ```
 
-### Tabele (PEGASUS)
+### Tabele
 
-| Tabela                      | Opis                                                        |
-| --------------------------- | ----------------------------------------------------------- |
-| `ROLES`                     | Role użytkowników (`Admin`, `UzytkownikWidok`)              |
-| `POST_CATEGORIES`           | Słownik kategorii treści (z flagą polityczną i kierunkiem)  |
-| `SPECIAL_ATTENTION_REASONS` | Słownik powodów szczególnej uwagi (skala 1–5)               |
-| `USERS`                     | Użytkownicy (imię, nazwisko, e-mail, status, rola)          |
-| `POSTS`                     | Posty (autor, kategoria, powód uwagi, skala ekstremalności) |
-| `LIKES`                     | Polubienia (user → post, czas spędzony)                     |
-| `COMMENTS`                  | Komentarze (user → post, treść, czas spędzony)              |
-| `SHARES`                    | Udostępnienia (from_user → post → to_user, czas spędzony)   |
-| `POST_VIEWS`                | Sesje oglądania postów (czas start/end)                     |
-| `USER_PROFILES`             | Profile behawioralne użytkowników (1:1 z `USERS`)           |
+| Tabela                      | Opis                                                                                      |
+| --------------------------- | ----------------------------------------------------------------------------------------- |
+| `USER_STATUSES`             | Słownik statusów kont (`ACTIVE`, `SUSPENDED`, `DELETED`, `WATCHED`)                       |
+| `ADMINS`                    | Administratorzy z poziomami uprawnień (1 = tylko odczyt, 5 = superadmin)                  |
+| `POST_CATEGORIES`           | Słownik kategorii treści (z flagą polityczną i kierunkiem)                                |
+| `SPECIAL_ATTENTION_REASONS` | Słownik powodów szczególnej uwagi (skala ważności 1–5)                                    |
+| `USERS`                     | Użytkownicy (imię, nazwisko, e-mail, status FK → `USER_STATUSES`)                         |
+| `POSTS`                     | Posty (autor, kategoria, powód uwagi, severity score, flaga moderacji)                    |
+| `LIKES`                     | Polubienia (user → post, znacznik czasu `LIKED_AT`)                                       |
+| `COMMENTS`                  | Komentarze (user → post, treść, znacznik czasu `COMMENTED_AT`)                            |
+| `SHARES`                    | Udostępnienia (from\_user → post → to\_user opcjonalny, znacznik czasu `SHARED_AT`)       |
+| `POST_VIEWS`                | Wyświetlenia postów (user → post)                                                         |
+| `USER_PROFILES`             | Profile behawioralne użytkowników                                                         |
 
-### Widoki (PEGASUS)
+### Widoki
 
-| Widok                       | Opis                                                                        |
-| --------------------------- | --------------------------------------------------------------------------- |
-| `V_USER_ACTIVITY`           | Sumaryczna aktywność użytkownika (lajki, komentarze, udostępnienia, widoki) |
-| `V_USER_PREFERRED_CATEGORY` | Top-1 preferowana kategoria (ważone: lajk×1, komentarz×3, udostępnienie×2)  |
-| `V_USER_POLITICAL_EXPOSURE` | Ekspozycja polityczna (LEFT / RIGHT / CENTER / EXTREMIST)                   |
-| `V_FLAGGED_POSTS`           | Treści szczególnej uwagi (dla administratora)                               |
-| `V_USER_FULL_PROFILE`       | Pełny profil behawioralny użytkownika (dla admina)                          |
-| `V_MY_INTERACTIONS`         | Interakcje zalogowanego użytkownika                                         |
+| Widok                       | Opis                                                                                      |
+| --------------------------- | ----------------------------------------------------------------------------------------- |
+| `V_USER_PREFERRED_CATEGORY` | Top-1 preferowana kategoria (ważone: lajk×1, komentarz×3, udostępnienie×2)                |
+| `V_USER_POLITICAL_EXPOSURE` | Ekspozycja polityczna (LEFT / RIGHT / CENTER / EXTREMIST)                                 |
+| `V_FLAGGED_POSTS`           | Treści szczególnej uwagi — posty z `REASON_ID IS NOT NULL` lub `IS_FLAGGED=1` (dla admina)|
+| `V_USER_FULL_PROFILE`       | Pełny profil behawioralny użytkownika                                                     |
+| `V_ALL_INTERACTIONS`        | Wszystkie interakcje (LIKE / COMMENT / SHARE) z kategorią i datą                          |
 
-### Procedury (PEGASUS)
+### Zmaterializowane widoki
 
-| Procedura                              | Opis                                                                                                                                                              |
+| MV                          | Opis                                                                                      |
+| --------------------------- | ----------------------------------------------------------------------------------------- |
+| `MV_USER_DAILY_ACTIVITY`    | Snapshot aktywności użytkownika (lajki, komentarze, udostępnienia)                        |
+| `MV_USER_ENGAGEMENT_RANKING`| Ranking użytkowników wg `ENGAGEMENT_SCORE` z `USER_PROFILES`                              |
+
+### Procedury
+
+| Procedura                              | Opis                                                                                                                  |
 | -------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `SP_CALCULATE_USER_PROFILE(p_user_id)` | Przelicza i zapisuje do `USER_PROFILES`: engagement score, profil aktywności, preferred category, political lean, extremism exposure, digital fingerprint SHA-256 |
-| `SP_CALCULATE_ALL_PROFILES`            | Wywołuje `SP_CALCULATE_USER_PROFILE` dla wszystkich aktywnych użytkowników                                                                                        |
-| `SP_BUILD_SOCIAL_CLUSTERS`             | Grupuje użytkowników w klastry społeczne na podstawie wspólnych kategorii                                                                                         |
-
+| `SP_CALCULATE_USER_PROFILE(p_user_id)` | Przelicza i zapisuje do `USER_PROFILES`: engagement score, profil aktywności, preferred category, political lean, extremism exposure, digital fingerprint SHA-256    |
+| `SP_CALCULATE_ALL_PROFILES`            | Wywołuje `SP_CALCULATE_USER_PROFILE` dla wszystkich użytkowników ze statusem != `DELETED`                                                                             |
+| `SP_BUILD_SOCIAL_CLUSTERS`             | Grupuje użytkowników w klastry społeczne na podstawie powiązań przez `SHARES` (`SOCIAL_CLUSTER_ID` = `MIN(USER_ID)` spośród bezpośrednio połączonych)                |
+| `REFRESH_ANALYTICS(p_called_by)`       | Odświeża oba zmaterializowane widoki; uruchamiana przez `DBMS_SCHEDULER` codziennie o 03:00                                                                           |
 ---
 
 ## Uruchamianie lokalnie (Docker + Oracle XE)
@@ -232,22 +230,6 @@ docker compose down -v
 .\setup.ps1 -Reset      # Windows
 bash setup.sh --reset   # Linux/macOS
 ```
-
----
-
-## Testy integracyjne (CI)
-
-Każdy schemat ma osobny suite testów w Pythonie (`oracledb` + `pytest`).  
-Fixture `setup_database` automatycznie tworzy schemat i ładuje SQL — testy można uruchomić na czystym Oracle XE.
-
-```bash
-# PEGASUS
-pip install -r pegasus/tests/requirements.txt
-ORACLE_SYS_PASSWORD=... PEGASUS_PASSWORD=... pytest pegasus/tests/test_database.py -v
-```
-
-GitHub Actions uruchamia oba suite równolegle przy każdym push do `pegasus/sql/**`.
-
 ---
 
 ## Kolejność skryptów SQL (Oracle Autonomous Database / chmura)
