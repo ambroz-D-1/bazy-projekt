@@ -104,6 +104,14 @@ def addAdmin():
         level)
     return executeQuery(queries.addAdminAcc,credentials)
 
+def query():
+    if permLevel < permissions["BigYahoo"]:
+        print("You do not have permissions to use this command")
+        return
+    print("\n","="*29,"\n   ENTER QUERY\n",'='*29,"\n")
+    q = input("\n->")
+    print("Result:\n",executeQuery(q, ()))
+    
 def mainLoop(command: list)->None:
     if not command:
         return
@@ -114,6 +122,8 @@ def mainLoop(command: list)->None:
             table(command[1:])
         case "set-status":
             setStatus(command[1:])
+        case "query":
+            query()
         case "add-admin":
             addAdmin()
         case "exit":
@@ -129,14 +139,9 @@ def executeQuery(sqlQuery: str, param: tuple)->list:
     if not sqlQuery:
         print("    WARNING! executeQuery: No query provided!")
         return []
-    if not param:
-        with oracledb.connect(dsn=DB_URL) as DB_CONN:
-            with DB_CONN.cursor() as cur:
-                cur.execute(sqlQuery)
-                rows = cur.fetchall()
     with oracledb.connect(dsn=DB_URL) as DB_CONN:
         with DB_CONN.cursor() as cur:
-            cur.execute(sqlQuery, param)
+            cur.execute(sqlQuery, param if param else None)
             DB_CONN.commit()
             try:
                 rows = cur.fetchall()
@@ -149,10 +154,11 @@ def login():
     cls()
     print("\n","="*29,"\n   ENTER CREDENTIALS\n",'='*29,"\n")
     credentials = (input("Enter login:\n ->"),sha256(getpass("Enter password:\n ->").encode()).hexdigest())
+    print(credentials)
     return executeQuery(queries.login,credentials)
 
 permLevel = login()[0][0]
-cls()
+#cls()
 if permLevel:
     print("\n","="*29,f"\n  Login successful\n  Permission level: {permLevel}","\n","="*29)
 else:
