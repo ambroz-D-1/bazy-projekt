@@ -74,7 +74,7 @@ def refreshAnalytics():
     if permLevel < permissions["TopGuy"]:
         print("You do not have permissions to use this command")
         return
-    executeQuery(queries.refreshAnalytics)
+    executeQuery(queries.refreshAnalytics, ())
 
 def setStatus(options:list = []):
     if permLevel < permissions["TopGuy"]:
@@ -150,7 +150,7 @@ def executeQuery(sqlQuery: str, param: tuple = ())->list:
         return []
     with oracledb.connect(dsn=DB_URL) as DB_CONN:
         with DB_CONN.cursor() as cur:
-            cur.execute(sqlQuery, param if param else None)
+            cur.execute(sqlQuery, param if param else ())
             DB_CONN.commit()
             try:
                 rows = cur.fetchall()
